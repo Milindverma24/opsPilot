@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-008",
+  "vendor_name": "GreenLeaf Packaging Corp",
+  "vendor_tax_id": "GSTIN-24HHHHH7777H8Z2",
+  "invoice_date": "2026-02-24",
+  "due_date": "2026-03-26",
+  "purchase_order_number": "PO-2026-008",
+  "currency": "INR",
+  "subtotal": 42500.0,
+  "tax": 7650.0,
+  "total": 50150.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "ICICI Bank",
+    "account_number": "001105001234",
+    "ifsc": "ICIC0000022"
+  },
+  "line_items": [
+    {
+      "description": "Biodegradable Corrugated Cartons (500x400x300)",
+      "quantity": 2500,
+      "unit_price": 17.0,
+      "tax": 7650.0,
+      "total": 50150.0
+    }
+  ],
+  "tags": [
+    "normal",
+    "matched-po"
+  ]
+}

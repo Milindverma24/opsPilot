@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-006",
+  "vendor_name": "Quantum Precision Tools",
+  "vendor_tax_id": "GSTIN-19FFFFF5555F6Z0",
+  "invoice_date": "2026-02-16",
+  "due_date": "2026-03-18",
+  "purchase_order_number": "PO-2026-006",
+  "currency": "INR",
+  "subtotal": 95000.0,
+  "tax": 17100.0,
+  "total": 112100.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "Bank of Baroda",
+    "account_number": "01234567890123",
+    "ifsc": "BARB0000123"
+  },
+  "line_items": [
+    {
+      "description": "Digital Calibration Calipers & Micrometer Set",
+      "quantity": 5,
+      "unit_price": 19000.0,
+      "tax": 17100.0,
+      "total": 112100.0
+    }
+  ],
+  "tags": [
+    "matched-po",
+    "high-value"
+  ]
+}

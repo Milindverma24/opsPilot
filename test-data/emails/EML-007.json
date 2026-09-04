@@ -1,0 +1,14 @@
+{
+  "id": "EML-007",
+  "sender": "security@cybershield.in",
+  "recipient": "ap@acme.test",
+  "subject": "Annual SOC License Renewal: INV-2026-007",
+  "body": "Attached is our annual renewal invoice for SOC log ingestion. Amount: INR 330,400.",
+  "attachments": [
+    {
+      "filename": "INV-2026-007.pdf",
+      "size": 52300
+    }
+  ],
+  "received_at": "2026-02-28T16:00:00Z"
+}

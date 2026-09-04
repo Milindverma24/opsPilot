@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-007",
+  "customer_name": "Modern Retail Enterprises",
+  "customer_email": "procurement@modernretail.com",
+  "customer_id": "CUST-7080",
+  "order_id": "ORD-44199",
+  "issue": "Batch of 20 units arrived with firmware defects and cannot pass our incoming QA. We are cancelling the order and requesting full refund of \u20b9125,000.",
+  "category": "REFUND",
+  "sentiment": "NEGATIVE",
+  "urgency": "HIGH",
+  "priority": "P1",
+  "requested_resolution": "Full Refund",
+  "refund_amount": 125000.0,
+  "received_at": "2026-02-28T11:40:00Z"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-006",
+  "customer_name": "Kavita Rao",
+  "customer_email": "kavita.rao@outlook.com",
+  "customer_id": "CUST-6102",
+  "order_id": "ORD-55401",
+  "issue": "The estimated delivery date was February 24th, but tracking has not updated since 4 days. Can you please check tracking status?",
+  "category": "DELIVERY",
+  "sentiment": "NEUTRAL",
+  "urgency": "MEDIUM",
+  "priority": "P3",
+  "requested_resolution": "Status update",
+  "refund_amount": 0.0,
+  "received_at": "2026-02-26T11:15:00Z"
+}

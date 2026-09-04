@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: opspilot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: opspilot
+      POSTGRES_PASSWORD: opspilot_password
+      POSTGRES_DB: opspilot_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opspilot -d opspilot_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: opspilot-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    container_name: opspilot-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=development
+      - DEMO_MODE=true
+      - DATABASE_URL=postgresql://opspilot:opspilot_password@postgres:5432/opspilot_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - JWT_SECRET_KEY=production-secret-key-ops-pilot-super-secure-token-2026
+      - DEFAULT_AI_PROVIDER=deterministic
+      - LLM_PROVIDER=mock
+      - PAYMENT_PROVIDER=mock
+      - SHIPPING_PROVIDER=mock
+      - EMAIL_PROVIDER=mock
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - storage_data:/app/storage
+
+  worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    container_name: opspilot-worker
+    restart: unless-stopped
+    command: celery -A apps.api.app.core.celery_app.celery worker --loglevel=info
+    environment:
+      - APP_ENV=development
+      - DEMO_MODE=true
+      - DATABASE_URL=postgresql://opspilot:opspilot_password@postgres:5432/opspilot_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - JWT_SECRET_KEY=production-secret-key-ops-pilot-super-secure-token-2026
+      - DEFAULT_AI_PROVIDER=deterministic
+      - LLM_PROVIDER=mock
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    container_name: opspilot-scheduler
+    restart: unless-stopped
+    command: celery -A apps.api.app.core.celery_app.celery beat --loglevel=info
+    environment:
+      - APP_ENV=development
+      - DEMO_MODE=true
+      - DATABASE_URL=postgresql://opspilot:opspilot_password@postgres:5432/opspilot_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.web
+    container_name: opspilot-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:
+  storage_data:

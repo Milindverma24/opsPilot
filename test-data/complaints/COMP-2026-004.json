@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-004",
+  "customer_name": "Priya Menon",
+  "customer_email": "priya.m@techcorp.in",
+  "customer_id": "CUST-4110",
+  "order_id": null,
+  "issue": "Our company administrator portal account has been locked since morning. None of our 50 employees can login.",
+  "category": "ACCOUNT",
+  "sentiment": "NEGATIVE",
+  "urgency": "CRITICAL",
+  "priority": "P1",
+  "requested_resolution": "Account unlock & password reset",
+  "refund_amount": 0.0,
+  "received_at": "2026-02-28T08:05:00Z"
+}

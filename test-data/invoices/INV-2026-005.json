@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-005",
+  "vendor_name": "Prime Facility Services",
+  "vendor_tax_id": "GSTIN-33EEEEE4444E5Z9",
+  "invoice_date": "2026-02-02",
+  "due_date": "2026-03-02",
+  "purchase_order_number": "PO-2026-005",
+  "currency": "INR",
+  "subtotal": 65000.0,
+  "tax": 11700.0,
+  "total": 76700.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "Kotak Mahindra Bank",
+    "account_number": "1234567890",
+    "ifsc": "KKBK0000123"
+  },
+  "line_items": [
+    {
+      "description": "HVAC Bi-Monthly Maintenance & Filter Replacement",
+      "quantity": 1,
+      "unit_price": 65000.0,
+      "tax": 11700.0,
+      "total": 76700.0
+    }
+  ],
+  "tags": [
+    "normal",
+    "matched-po"
+  ]
+}

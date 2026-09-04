@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-015",
+  "vendor_name": "Silicon Micro Systems",
+  "vendor_tax_id": "GSTIN-29NNNNN4444N4Z4",
+  "invoice_date": "2026-02-23",
+  "due_date": "2026-03-25",
+  "purchase_order_number": null,
+  "currency": "INR",
+  "subtotal": 88000.0,
+  "tax": 15840.0,
+  "total": 103840.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "Yes Bank",
+    "account_number": "123123123123",
+    "ifsc": "YESB0000123"
+  },
+  "line_items": [
+    {
+      "description": "NVMe M.2 2TB SSD Enterprise Drives",
+      "quantity": 8,
+      "unit_price": 11000.0,
+      "tax": 15840.0,
+      "total": 103840.0
+    }
+  ],
+  "tags": [
+    "high-value",
+    "policy-approval"
+  ]
+}

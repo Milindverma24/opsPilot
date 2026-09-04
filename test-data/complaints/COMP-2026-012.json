@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-012",
+  "customer_name": "Rohan Gupta",
+  "customer_email": "rohan.g@solutech.com",
+  "customer_id": "CUST-3388",
+  "order_id": "ORD-00998",
+  "issue": "Thank you for the prompt dispatch. Just writing to say the packaging was outstanding and we appreciate the team's effort.",
+  "category": "OTHER",
+  "sentiment": "POSITIVE",
+  "urgency": "LOW",
+  "priority": "P4",
+  "requested_resolution": "None",
+  "refund_amount": 0.0,
+  "received_at": "2026-02-26T18:00:00Z"
+}

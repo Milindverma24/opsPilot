@@ -1,0 +1,9 @@
+{
+  "id": "EML-006",
+  "sender": "devops@byteflow.io",
+  "recipient": "support@acme.test",
+  "subject": "CRITICAL INCIDENT: 504 Timeouts on Webhook Delivery",
+  "body": "Team,\n\nOur webhook receivers are timing out on your endpoint. Please escalate to on-call engineering.",
+  "attachments": [],
+  "received_at": "2026-02-28T15:20:00Z"
+}

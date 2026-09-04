@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-008",
+  "customer_name": "Arun Patel",
+  "customer_email": "arun.patel@gmail.com",
+  "customer_id": "CUST-8012",
+  "order_id": "ORD-33211",
+  "issue": "The inner box was slightly dented, though the internal product seems to work fine. Just giving feedback on fragile sticker placement.",
+  "category": "PRODUCT",
+  "sentiment": "NEUTRAL",
+  "urgency": "LOW",
+  "priority": "P4",
+  "requested_resolution": "Feedback acknowledgement",
+  "refund_amount": 0.0,
+  "received_at": "2026-02-25T13:10:00Z"
+}

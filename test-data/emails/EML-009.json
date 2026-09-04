@@ -1,0 +1,9 @@
+{
+  "id": "EML-009",
+  "sender": "priya.m@techcorp.in",
+  "recipient": "support@acme.test",
+  "subject": "Admin Account Locked - 50 employees impacted",
+  "body": "Urgent help needed: Our admin account admin@techcorp.in is locked. Please unlock immediately.",
+  "attachments": [],
+  "received_at": "2026-02-28T08:05:00Z"
+}

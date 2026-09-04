@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-001",
+  "customer_name": "Rajesh Sharma",
+  "customer_email": "rajesh.sharma@example.com",
+  "customer_id": "CUST-1049",
+  "order_id": "ORD-99214",
+  "issue": "This is the third time I have contacted you. My order has still not arrived. I want a refund immediately.",
+  "category": "DELIVERY",
+  "sentiment": "NEGATIVE",
+  "urgency": "CRITICAL",
+  "priority": "P1",
+  "requested_resolution": "Immediate Refund",
+  "refund_amount": 14500.0,
+  "received_at": "2026-02-28T09:15:00Z"
+}

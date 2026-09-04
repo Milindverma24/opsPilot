@@ -1,0 +1,14 @@
+{
+  "id": "EML-003",
+  "sender": "cloud-billing@apexcloud.com",
+  "recipient": "ap@acme.test",
+  "subject": "Quarterly Cloud Infrastructure Statement: INV-2026-002",
+  "body": "Hello Operations,\n\nYour quarterly cloud compute cluster billing is ready. Invoice INV-2026-002 total is INR 147,500.\nDue by March 15, 2026.\n\nThank you,\nApex Billing",
+  "attachments": [
+    {
+      "filename": "INV-2026-002.pdf",
+      "size": 61400
+    }
+  ],
+  "received_at": "2026-02-28T10:00:00Z"
+}

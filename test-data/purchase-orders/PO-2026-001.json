@@ -1,0 +1,30 @@
+{
+  "po_number": "PO-2026-001",
+  "vendor_name": "ABC Industrial Supplies",
+  "vendor_tax_id": "GSTIN-07AAAAA0000A1Z5",
+  "date": "2026-02-15",
+  "amount": 84500.0,
+  "currency": "INR",
+  "status": "APPROVED",
+  "department": "Operations",
+  "items": [
+    {
+      "description": "Industrial Safety Helmets (Class E)",
+      "quantity": 50,
+      "unit_price": 450.0,
+      "total": 22500.0
+    },
+    {
+      "description": "Heavy Duty Neoprene Work Gloves",
+      "quantity": 100,
+      "unit_price": 250.0,
+      "total": 25000.0
+    },
+    {
+      "description": "Spill Containment Pallets 4-Drum",
+      "quantity": 2,
+      "unit_price": 18500.0,
+      "total": 37000.0
+    }
+  ]
+}

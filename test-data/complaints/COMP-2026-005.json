@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-005",
+  "customer_name": "Vikram Malhotra",
+  "customer_email": "v.malhotra@zenith.org",
+  "customer_id": "CUST-5221",
+  "order_id": "ORD-66312",
+  "issue": "I ordered model Pro-X500 in Space Gray, but you shipped model Pro-X300 in White. I need the correct model urgently for a client deployment.",
+  "category": "PRODUCT",
+  "sentiment": "NEGATIVE",
+  "urgency": "MEDIUM",
+  "priority": "P2",
+  "requested_resolution": "Express exchange",
+  "refund_amount": 0.0,
+  "received_at": "2026-02-27T16:45:00Z"
+}

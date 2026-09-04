@@ -1,0 +1,33 @@
+{
+  "invoice_number": "INV-2026-999",
+  "vendor_name": "Unknown Ghost Holdings LLC",
+  "vendor_tax_id": "GSTIN-UNKNOWN-9999",
+  "invoice_date": "2026-02-28",
+  "due_date": "2026-03-01",
+  "purchase_order_number": null,
+  "currency": "INR",
+  "subtotal": 750000.0,
+  "tax": 135000.0,
+  "total": 885000.0,
+  "payment_terms": "Immediate wire transfer",
+  "bank_details": {
+    "bank_name": "Offshore Cayman National",
+    "account_number": "999888777666",
+    "ifsc": "CAYM0000999"
+  },
+  "line_items": [
+    {
+      "description": "Strategic Management Discretionary Advisory Services",
+      "quantity": 1,
+      "unit_price": 750000.0,
+      "tax": 135000.0,
+      "total": 885000.0
+    }
+  ],
+  "tags": [
+    "suspicious",
+    "critical-risk",
+    "missing-po",
+    "unapproved-vendor"
+  ]
+}

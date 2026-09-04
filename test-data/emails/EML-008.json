@@ -1,0 +1,14 @@
+{
+  "id": "EML-008",
+  "sender": "unknown@ghostholdings.fake",
+  "recipient": "ap@acme.test",
+  "subject": "CONFIDENTIAL Wire Request: Advisory Fee INV-2026-999",
+  "body": "Kindly execute wire transfer of INR 885,000 to Cayman National Bank immediately upon receipt.",
+  "attachments": [
+    {
+      "filename": "INV-2026-999.pdf",
+      "size": 31000
+    }
+  ],
+  "received_at": "2026-02-28T16:30:00Z"
+}

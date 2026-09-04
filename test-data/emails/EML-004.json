@@ -1,0 +1,9 @@
+{
+  "id": "EML-004",
+  "sender": "procurement@modernretail.com",
+  "recipient": "support@acme.test",
+  "subject": "Notice of Order Cancellation & Full Refund Demand: ORD-44199",
+  "body": "To the Head of Operations,\n\nWe are returning the 20 batch units for ORD-44199 due to QA failure. Process full refund of INR 125,000 to our current account within 48 hours.",
+  "attachments": [],
+  "received_at": "2026-02-28T11:40:00Z"
+}

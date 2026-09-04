@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-010",
+  "customer_name": "ByteFlow Systems",
+  "customer_email": "devops@byteflow.io",
+  "customer_id": "CUST-1190",
+  "order_id": null,
+  "issue": "Your webhook endpoint has been throwing HTTP 504 Gateway Timeout intermittently for all event deliveries since 14:00 UTC.",
+  "category": "TECHNICAL",
+  "sentiment": "NEGATIVE",
+  "urgency": "HIGH",
+  "priority": "P1",
+  "requested_resolution": "Bug fix and SLA credit",
+  "refund_amount": 0.0,
+  "received_at": "2026-02-28T15:20:00Z"
+}

@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-009",
+  "vendor_name": "BlueLine Telecommunications",
+  "vendor_tax_id": "GSTIN-36IIIII8888I9Z3",
+  "invoice_date": "2026-02-25",
+  "due_date": "2026-03-15",
+  "purchase_order_number": "PO-2026-009",
+  "currency": "INR",
+  "subtotal": 18500.0,
+  "tax": 3330.0,
+  "total": 21830.0,
+  "payment_terms": "Net 15",
+  "bank_details": {
+    "bank_name": "Standard Chartered",
+    "account_number": "445566778899",
+    "ifsc": "SCBL0036001"
+  },
+  "line_items": [
+    {
+      "description": "Dedicated Leased Line 1 Gbps Monthly Billing",
+      "quantity": 1,
+      "unit_price": 18500.0,
+      "tax": 3330.0,
+      "total": 21830.0
+    }
+  ],
+  "tags": [
+    "normal",
+    "matched-po"
+  ]
+}

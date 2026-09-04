@@ -1,0 +1,30 @@
+{
+  "invoice_number": "INV-2026-012",
+  "vendor_name": "SaaS Cloud Sync Inc",
+  "vendor_tax_id": "US-EIN-12-3456789",
+  "invoice_date": "2026-02-01",
+  "due_date": "2026-03-01",
+  "purchase_order_number": null,
+  "currency": "USD",
+  "subtotal": 1200.0,
+  "tax": 0.0,
+  "total": 1200.0,
+  "payment_terms": "Credit Card / Wire",
+  "bank_details": {
+    "bank_name": "JPMorgan Chase",
+    "account_number": "0099887766",
+    "swift": "CHASUS33"
+  },
+  "line_items": [
+    {
+      "description": "Developer Seat Licenses (10 seats)",
+      "quantity": 10,
+      "unit_price": 120.0,
+      "tax": 0.0,
+      "total": 1200.0
+    }
+  ],
+  "tags": [
+    "foreign-currency"
+  ]
+}

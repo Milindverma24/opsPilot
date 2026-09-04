@@ -1,0 +1,18 @@
+{
+  "po_number": "PO-2026-004",
+  "vendor_name": "Global Logistics Express",
+  "vendor_tax_id": "GSTIN-06DDDDD3333D4Z8",
+  "date": "2026-02-05",
+  "amount": 32000.0,
+  "currency": "INR",
+  "status": "APPROVED",
+  "department": "Supply Chain",
+  "items": [
+    {
+      "description": "Express Freight Dispatch - North Hub",
+      "quantity": 1,
+      "unit_price": 32000.0,
+      "total": 32000.0
+    }
+  ]
+}

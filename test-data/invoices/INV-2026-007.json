@@ -1,0 +1,32 @@
+{
+  "invoice_number": "INV-2026-007",
+  "vendor_name": "CyberShield Defense Labs",
+  "vendor_tax_id": "GSTIN-08GGGGG6666G7Z1",
+  "invoice_date": "2026-02-22",
+  "due_date": "2026-03-24",
+  "purchase_order_number": "PO-2026-007",
+  "currency": "INR",
+  "subtotal": 280000.0,
+  "tax": 50400.0,
+  "total": 330400.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "HDFC Bank",
+    "account_number": "50200099887766",
+    "ifsc": "HDFC0000456"
+  },
+  "line_items": [
+    {
+      "description": "Annual SOC Log Ingestion & Threat Intelligence Tier-2",
+      "quantity": 1,
+      "unit_price": 280000.0,
+      "tax": 50400.0,
+      "total": 330400.0
+    }
+  ],
+  "tags": [
+    "matched-po",
+    "high-value",
+    "policy-approval"
+  ]
+}

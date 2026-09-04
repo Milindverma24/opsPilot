@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-009",
+  "customer_name": "Deepak Joshi",
+  "customer_email": "d.joshi@infra.co",
+  "customer_id": "CUST-9124",
+  "order_id": "ORD-22105",
+  "issue": "We were quoted an agreed discount of 15% on bulk purchase, but the final invoice does not reflect the discount code 'BULK15'.",
+  "category": "PAYMENT",
+  "sentiment": "NEGATIVE",
+  "urgency": "MEDIUM",
+  "priority": "P2",
+  "requested_resolution": "Revised Invoice or Credit Note",
+  "refund_amount": 9500.0,
+  "received_at": "2026-02-27T09:50:00Z"
+}

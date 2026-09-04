@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-002",
+  "vendor_name": "Apex Cloud Infrastructure",
+  "vendor_tax_id": "GSTIN-27BBBBB1111B2Z6",
+  "invoice_date": "2026-02-15",
+  "due_date": "2026-03-15",
+  "purchase_order_number": "PO-2026-002",
+  "currency": "INR",
+  "subtotal": 125000.0,
+  "tax": 22500.0,
+  "total": 147500.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "ICICI Bank",
+    "account_number": "001105009988",
+    "ifsc": "ICIC0000011"
+  },
+  "line_items": [
+    {
+      "description": "Dedicated Compute Cluster Instance (Q1)",
+      "quantity": 1,
+      "unit_price": 125000.0,
+      "tax": 22500.0,
+      "total": 147500.0
+    }
+  ],
+  "tags": [
+    "high-value",
+    "policy-approval"
+  ]
+}

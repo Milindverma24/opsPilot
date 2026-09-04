@@ -1,0 +1,30 @@
+{
+  "invoice_number": "INV-2026-001",
+  "vendor_name": "ABC Industrial Supplies",
+  "vendor_tax_id": "GSTIN-07AAAAA0000A1Z5",
+  "invoice_date": "2026-02-20",
+  "due_date": "2026-03-22",
+  "purchase_order_number": "PO-2026-001",
+  "currency": "INR",
+  "subtotal": 84500.0,
+  "tax": 15210.0,
+  "total": 99710.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "HDFC Bank",
+    "account_number": "50200012345678",
+    "ifsc": "HDFC0000123"
+  },
+  "line_items": [
+    {
+      "description": "Industrial Safety Helmets (Class E)",
+      "quantity": 50,
+      "unit_price": 450.0,
+      "tax": 4050.0,
+      "total": 26550.0
+    }
+  ],
+  "tags": [
+    "duplicate"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "EML-010",
+  "sender": "invoicing@greenleafpackaging.com",
+  "recipient": "ap@acme.test",
+  "subject": "Packaging Invoices against PO-2026-008",
+  "body": "Dear Acme Team,\n\nPlease find attached INV-2026-008 for corrugated cartons supplied. Total: INR 50,150.\n\nRegards,\nGreenLeaf Accounts",
+  "attachments": [
+    {
+      "filename": "INV-2026-008.pdf",
+      "size": 44100
+    }
+  ],
+  "received_at": "2026-02-26T12:00:00Z"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-003",
+  "customer_name": "Sunil Kumar",
+  "customer_email": "sunil.k@example.com",
+  "customer_id": "CUST-3319",
+  "order_id": "ORD-77450",
+  "issue": "My credit card was charged twice for order ORD-77450. Transaction IDs TXN-01 and TXN-02 both show debit of \u20b918,000.",
+  "category": "PAYMENT",
+  "sentiment": "NEGATIVE",
+  "urgency": "HIGH",
+  "priority": "P1",
+  "requested_resolution": "Refund of duplicate charge",
+  "refund_amount": 18000.0,
+  "received_at": "2026-02-27T14:20:00Z"
+}

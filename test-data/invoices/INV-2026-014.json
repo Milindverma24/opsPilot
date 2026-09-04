@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-014",
+  "vendor_name": "City Stationary Mart",
+  "vendor_tax_id": "GSTIN-07MMMMM3333M3Z3",
+  "invoice_date": "2026-02-27",
+  "due_date": "2026-03-27",
+  "purchase_order_number": null,
+  "currency": "INR",
+  "subtotal": 3400.0,
+  "tax": 612.0,
+  "total": 4012.0,
+  "payment_terms": "Net 15",
+  "bank_details": {
+    "bank_name": "Punjab National Bank",
+    "account_number": "998877665544",
+    "ifsc": "PUNB0001234"
+  },
+  "line_items": [
+    {
+      "description": "Whiteboard Markers & Sticky Notes Pack",
+      "quantity": 4,
+      "unit_price": 850.0,
+      "tax": 612.0,
+      "total": 4012.0
+    }
+  ],
+  "tags": [
+    "low-value",
+    "auto-approvable"
+  ]
+}

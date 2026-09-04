@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-016",
+  "vendor_name": "Lex Legal Associates",
+  "vendor_tax_id": "GSTIN-07OOOOO5555O5Z5",
+  "invoice_date": "2026-02-15",
+  "due_date": "2026-03-15",
+  "purchase_order_number": null,
+  "currency": "INR",
+  "subtotal": 150000.0,
+  "tax": 27000.0,
+  "total": 177000.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "Federal Bank",
+    "account_number": "556677889900",
+    "ifsc": "FDRL0001234"
+  },
+  "line_items": [
+    {
+      "description": "Monthly Corporate Legal Advisory & IP Retainer",
+      "quantity": 1,
+      "unit_price": 150000.0,
+      "tax": 27000.0,
+      "total": 177000.0
+    }
+  ],
+  "tags": [
+    "high-value",
+    "legal"
+  ]
+}

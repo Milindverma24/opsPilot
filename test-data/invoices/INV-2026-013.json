@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-013",
+  "vendor_name": "Metro Water & Utility",
+  "vendor_tax_id": "GSTIN-07LLLLL2222L2Z2",
+  "invoice_date": "2025-11-01",
+  "due_date": "2025-11-30",
+  "purchase_order_number": null,
+  "currency": "INR",
+  "subtotal": 8500.0,
+  "tax": 1530.0,
+  "total": 10030.0,
+  "payment_terms": "Immediate",
+  "bank_details": {
+    "bank_name": "Union Bank",
+    "account_number": "334455667788",
+    "ifsc": "UBIN0001234"
+  },
+  "line_items": [
+    {
+      "description": "Commercial Potable Water Delivery Q4-2025",
+      "quantity": 1,
+      "unit_price": 8500.0,
+      "tax": 1530.0,
+      "total": 10030.0
+    }
+  ],
+  "tags": [
+    "overdue",
+    "retroactive"
+  ]
+}

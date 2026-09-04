@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-015",
+  "customer_name": "Tanya Kapoor",
+  "customer_email": "tanya.k@fashionhub.in",
+  "customer_id": "CUST-6622",
+  "order_id": "ORD-88770",
+  "issue": "We would like to know your return window for unboxed unused electronics. Is it 14 days or 30 days?",
+  "category": "OTHER",
+  "sentiment": "NEUTRAL",
+  "urgency": "LOW",
+  "priority": "P4",
+  "requested_resolution": "Policy clarification",
+  "refund_amount": 0.0,
+  "received_at": "2026-02-26T15:30:00Z"
+}

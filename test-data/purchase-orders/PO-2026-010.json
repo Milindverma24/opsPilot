@@ -1,0 +1,18 @@
+{
+  "po_number": "PO-2026-010",
+  "vendor_name": "Starlight Print & Media",
+  "vendor_tax_id": "GSTIN-09JJJJJ9999J0Z4",
+  "date": "2026-02-25",
+  "amount": 27000.0,
+  "currency": "INR",
+  "status": "APPROVED",
+  "department": "Marketing",
+  "items": [
+    {
+      "description": "Product Catalogs Edition 2026 High Gloss",
+      "quantity": 1000,
+      "unit_price": 27.0,
+      "total": 27000.0
+    }
+  ]
+}

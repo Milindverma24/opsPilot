@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-002",
+  "customer_name": "Anita Desai",
+  "customer_email": "anita.desai@example.com",
+  "customer_id": "CUST-2031",
+  "order_id": "ORD-88120",
+  "issue": "The package arrived with water damage and two broken tempered glass items. Please send replacements or credit my account.",
+  "category": "PRODUCT",
+  "sentiment": "NEGATIVE",
+  "urgency": "HIGH",
+  "priority": "P2",
+  "requested_resolution": "Replacement",
+  "refund_amount": 6200.0,
+  "received_at": "2026-02-28T10:30:00Z"
+}

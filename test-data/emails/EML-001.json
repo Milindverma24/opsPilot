@@ -1,0 +1,14 @@
+{
+  "id": "EML-001",
+  "sender": "billing@abcsupplies.com",
+  "recipient": "ap@acme.test",
+  "subject": "Invoice INV-2026-001 for PO-2026-001 - ABC Industrial Supplies",
+  "body": "Dear Finance Team,\n\nPlease find attached our invoice INV-2026-001 for safety helmets and neoprene gloves dispatched against your purchase order PO-2026-001.\nTotal payable amount: INR 99,710 inclusive of GST.\n\nWarm regards,\nABC Industrial Accounts Team",
+  "attachments": [
+    {
+      "filename": "INV-2026-001.pdf",
+      "size": 45200
+    }
+  ],
+  "received_at": "2026-02-28T08:30:00Z"
+}

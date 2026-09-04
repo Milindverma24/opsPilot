@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-013",
+  "customer_name": "Swati Sen",
+  "customer_email": "swati.sen@startup.xyz",
+  "customer_id": "CUST-4477",
+  "order_id": "SUB-8877",
+  "issue": "Please cancel our auto-renewal subscription immediately before the next billing cycle on March 5th.",
+  "category": "ACCOUNT",
+  "sentiment": "NEUTRAL",
+  "urgency": "MEDIUM",
+  "priority": "P2",
+  "requested_resolution": "Subscription Cancellation",
+  "refund_amount": 0.0,
+  "received_at": "2026-02-28T12:00:00Z"
+}

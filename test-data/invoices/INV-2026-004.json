@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-004",
+  "vendor_name": "Global Logistics Express",
+  "vendor_tax_id": "GSTIN-06DDDDD3333D4Z8",
+  "invoice_date": "2026-02-18",
+  "due_date": "2026-03-20",
+  "purchase_order_number": null,
+  "currency": "INR",
+  "subtotal": 14500.0,
+  "tax": 2610.0,
+  "total": 17110.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "State Bank of India",
+    "account_number": "300123456789",
+    "ifsc": "SBIN0001234"
+  },
+  "line_items": [
+    {
+      "description": "Local Courier & Intra-city Consignment",
+      "quantity": 10,
+      "unit_price": 1450.0,
+      "tax": 2610.0,
+      "total": 17110.0
+    }
+  ],
+  "tags": [
+    "missing-po",
+    "low-risk"
+  ]
+}

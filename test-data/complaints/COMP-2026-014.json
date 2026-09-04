@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-014",
+  "customer_name": "Gaurav Bansal",
+  "customer_email": "gaurav.b@gmail.com",
+  "customer_id": "CUST-5511",
+  "order_id": "ORD-99881",
+  "issue": "Box arrived sealed, but the 65W fast charger cable listed on the box contents was missing from inside the compartment.",
+  "category": "PRODUCT",
+  "sentiment": "NEGATIVE",
+  "urgency": "LOW",
+  "priority": "P3",
+  "requested_resolution": "Ship missing cable",
+  "refund_amount": 1200.0,
+  "received_at": "2026-02-27T10:15:00Z"
+}

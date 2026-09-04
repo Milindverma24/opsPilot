@@ -1,0 +1,18 @@
+{
+  "po_number": "PO-2026-008",
+  "vendor_name": "GreenLeaf Packaging Corp",
+  "vendor_tax_id": "GSTIN-24HHHHH7777H8Z2",
+  "date": "2026-02-20",
+  "amount": 42500.0,
+  "currency": "INR",
+  "status": "APPROVED",
+  "department": "Packaging",
+  "items": [
+    {
+      "description": "Biodegradable Corrugated Cartons (500x400x300)",
+      "quantity": 2500,
+      "unit_price": 17.0,
+      "total": 42500.0
+    }
+  ]
+}

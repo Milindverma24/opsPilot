@@ -1,0 +1,30 @@
+{
+  "invoice_number": "INV-2026-018",
+  "vendor_name": "Caf\u00e9 Beans Wholesale",
+  "vendor_tax_id": "GSTIN-29QQQQQ7777Q7Z7",
+  "invoice_date": "2026-02-26",
+  "due_date": "2026-03-12",
+  "purchase_order_number": null,
+  "currency": "INR",
+  "subtotal": 16000.0,
+  "tax": 800.0,
+  "total": 16800.0,
+  "payment_terms": "Net 15",
+  "bank_details": {
+    "bank_name": "HDFC Bank",
+    "account_number": "50200077665544",
+    "ifsc": "HDFC0000999"
+  },
+  "line_items": [
+    {
+      "description": "Arabica Whole Bean Blend 5kg Bags",
+      "quantity": 4,
+      "unit_price": 4000.0,
+      "tax": 800.0,
+      "total": 16800.0
+    }
+  ],
+  "tags": [
+    "normal"
+  ]
+}

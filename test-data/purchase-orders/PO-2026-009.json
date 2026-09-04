@@ -1,0 +1,18 @@
+{
+  "po_number": "PO-2026-009",
+  "vendor_name": "BlueLine Telecommunications",
+  "vendor_tax_id": "GSTIN-36IIIII8888I9Z3",
+  "date": "2026-02-22",
+  "amount": 18500.0,
+  "currency": "INR",
+  "status": "APPROVED",
+  "department": "IT Operations",
+  "items": [
+    {
+      "description": "Dedicated Leased Line 1 Gbps Monthly Billing",
+      "quantity": 1,
+      "unit_price": 18500.0,
+      "total": 18500.0
+    }
+  ]
+}

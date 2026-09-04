@@ -1,0 +1,30 @@
+{
+  "invoice_number": "INV-2026-017",
+  "vendor_name": "Helios Solar Solutions",
+  "vendor_tax_id": "GSTIN-08PPPPP6666P6Z6",
+  "invoice_date": "2026-02-21",
+  "due_date": "2026-03-21",
+  "purchase_order_number": null,
+  "currency": "INR",
+  "subtotal": 35000.0,
+  "tax": 6300.0,
+  "total": 41300.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "IndusInd Bank",
+    "account_number": "778899001122",
+    "ifsc": "INDB0000123"
+  },
+  "line_items": [
+    {
+      "description": "Rooftop Solar PV Array Cleaning & Inverter Inspection",
+      "quantity": 1,
+      "unit_price": 35000.0,
+      "tax": 6300.0,
+      "total": 41300.0
+    }
+  ],
+  "tags": [
+    "normal"
+  ]
+}

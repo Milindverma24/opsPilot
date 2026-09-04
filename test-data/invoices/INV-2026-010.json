@@ -1,0 +1,31 @@
+{
+  "invoice_number": "INV-2026-010",
+  "vendor_name": "Starlight Print & Media",
+  "vendor_tax_id": "GSTIN-09JJJJJ9999J0Z4",
+  "invoice_date": "2026-02-26",
+  "due_date": "2026-03-28",
+  "purchase_order_number": "PO-2026-010",
+  "currency": "INR",
+  "subtotal": 27000.0,
+  "tax": 4860.0,
+  "total": 31860.0,
+  "payment_terms": "Net 30",
+  "bank_details": {
+    "bank_name": "Canara Bank",
+    "account_number": "112233445566",
+    "ifsc": "CNRB0001234"
+  },
+  "line_items": [
+    {
+      "description": "Product Catalogs Edition 2026 High Gloss",
+      "quantity": 1000,
+      "unit_price": 27.0,
+      "tax": 4860.0,
+      "total": 31860.0
+    }
+  ],
+  "tags": [
+    "normal",
+    "matched-po"
+  ]
+}

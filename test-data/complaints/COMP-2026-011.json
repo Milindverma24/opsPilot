@@ -1,0 +1,15 @@
+{
+  "id": "COMP-2026-011",
+  "customer_name": "Meera Nair",
+  "customer_email": "meera.nair@corp.net",
+  "customer_id": "CUST-2234",
+  "order_id": "ORD-11090",
+  "issue": "The courier marked package as delivered at gate 4, but our reception is at gate 1 and security has no record of any delivery.",
+  "category": "DELIVERY",
+  "sentiment": "NEGATIVE",
+  "urgency": "HIGH",
+  "priority": "P2",
+  "requested_resolution": "Courier investigation",
+  "refund_amount": 0.0,
+  "received_at": "2026-02-27T17:10:00Z"
+}

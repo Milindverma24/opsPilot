@@ -1,0 +1,14 @@
+{
+  "id": "EML-005",
+  "sender": "facilities@primefacility.com",
+  "recipient": "ap@acme.test",
+  "subject": "Service Invoice INV-2026-005 - Bi-Monthly HVAC Service",
+  "body": "Dear Acme,\n\nAttached is invoice INV-2026-005 against PO-2026-005 for HVAC filter replacements completed last week.\n\nBest,\nPrime Facility Team",
+  "attachments": [
+    {
+      "filename": "INV-2026-005.pdf",
+      "size": 39100
+    }
+  ],
+  "received_at": "2026-02-27T15:00:00Z"
+}

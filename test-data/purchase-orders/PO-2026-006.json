@@ -1,0 +1,18 @@
+{
+  "po_number": "PO-2026-006",
+  "vendor_name": "Quantum Precision Tools",
+  "vendor_tax_id": "GSTIN-19FFFFF5555F6Z0",
+  "date": "2026-02-12",
+  "amount": 95000.0,
+  "currency": "INR",
+  "status": "APPROVED",
+  "department": "Manufacturing",
+  "items": [
+    {
+      "description": "Digital Calibration Calipers & Micrometer Set",
+      "quantity": 5,
+      "unit_price": 19000.0,
+      "total": 95000.0
+    }
+  ]
+}

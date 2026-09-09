@@ -96,6 +96,14 @@ export function CustomerChatWidget() {
       }
     } catch (err) {
       console.error("Failed to start chat session:", err);
+      setMessages([
+        {
+          id: "msg-err",
+          sender_type: "SYSTEM",
+          content: "Sorry, I had trouble connecting. Type your question below or click an action to retry!",
+          created_at: new Date().toISOString(),
+        },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -110,7 +118,7 @@ export function CustomerChatWidget() {
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
-    if (!text || loading || !conversationId) return;
+    if (!text || loading) return;
 
     setInputText("");
 
@@ -125,16 +133,29 @@ export function CustomerChatWidget() {
     setLoading(true);
 
     try {
-      const res = await api.customer.sendMessage(conversationId, text);
-      const data = res.data;
+      let activeConvId = conversationId;
+      if (!activeConvId) {
+        const convRes = await api.customer.startConversation({
+          channel: "WEBSITE_CHAT",
+          customer_id: isGuest ? undefined : simulatedCustomer,
+          organization_slug: "urbanthread",
+        });
+        activeConvId = convRes.data.conversation_id;
+        setConversationId(activeConvId);
+      }
+
+      const res = await api.customer.sendMessage(activeConvId, text);
+      const data = res?.data || res || {};
+      const responseType = data.response_type || data.message_type || "TEXT";
+      const messageContent = data.message || data.content || "I am here to help!";
 
       // Append assistant message
       const aiMsg: ChatMessage = {
         id: "res-" + Date.now(),
-        sender_type: data.response_type === "HUMAN_HANDOFF" ? "SYSTEM" : "AI_AGENT",
+        sender_type: responseType === "HUMAN_HANDOFF" ? "SYSTEM" : "AI_AGENT",
         sender_id: "aria-support-ai",
-        message_type: data.response_type,
-        content: data.message,
+        message_type: responseType,
+        content: messageContent,
         metadata: data.card_data || data.metadata || (data.requires_confirmation ? { confirmation: true } : {}),
         created_at: new Date().toISOString(),
       };
@@ -143,7 +164,7 @@ export function CustomerChatWidget() {
 
       if (data.requires_confirmation) {
         setSuggestedActions(["Yes, proceed with return", "No, cancel this request"]);
-      } else if (data.response_type === "HUMAN_HANDOFF") {
+      } else if (responseType === "HUMAN_HANDOFF") {
         setHandoffRequested(true);
         setSuggestedActions(["Check ticket status", "Start new inquiry"]);
       } else {
@@ -311,11 +332,14 @@ export function CustomerChatWidget() {
               const isSystem = msg.sender_type === "SYSTEM";
 
               if (isSystem) {
+                const isActualHandoff = msg.message_type === "HUMAN_HANDOFF" || msg.metadata?.ticket_id;
                 return (
-                  <div key={msg.id} className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div key={msg.id} className={`p-3 ${isActualHandoff ? "bg-amber-50 border-amber-200 text-amber-800" : "bg-rose-50 border-rose-200 text-rose-800"} border rounded-xl text-xs flex items-start gap-2.5`}>
+                    <AlertTriangle className={`w-4 h-4 ${isActualHandoff ? "text-amber-600" : "text-rose-600"} shrink-0 mt-0.5`} />
                     <div className="space-y-1">
-                      <div className="font-semibold text-amber-900">Human Support Handover</div>
+                      <div className={`font-semibold ${isActualHandoff ? "text-amber-900" : "text-rose-900"}`}>
+                        {isActualHandoff ? "Human Support Handover" : "Connection Notice"}
+                      </div>
                       <div>{msg.content}</div>
                       {msg.metadata?.ticket_id && (
                         <div className="text-[10px] font-mono text-amber-700 font-medium">

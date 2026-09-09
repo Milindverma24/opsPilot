@@ -86,9 +86,19 @@ app = FastAPI(
 )
 
 # CORS Middleware
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+for o in settings.cors_origin_list:
+    if o not in origins:
+        origins.append(o)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permits Next.js dev server on localhost:3000
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

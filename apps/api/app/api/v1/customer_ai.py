@@ -8,8 +8,10 @@ from pydantic import BaseModel, Field
 
 from apps.api.app.core.database import get_db
 from apps.api.app.core.security import get_current_user_optional, get_current_user
+import uuid
 from apps.api.app.models.tenant import User, Organization
 from apps.api.app.models.ecommerce import CustomerConversation, ConversationMessage
+from apps.api.app.models.operations import Customer
 from apps.api.app.models.base import get_utc_now
 from apps.api.app.services.customer_ai_service import CustomerAIService
 
@@ -56,10 +58,34 @@ def start_conversation(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found.")
 
     cust_id = None
-    if current_user and current_user.role and current_user.role.name == "CUSTOMER":
+    if current_user and current_user.role and getattr(current_user.role, "name", None) == "CUSTOMER":
         cust_id = current_user.id
     elif payload.customer_id:
-        cust_id = payload.customer_id
+        target = db.query(Customer).filter(Customer.id == payload.customer_id).first()
+        if target:
+            cust_id = target.id
+
+    if not cust_id:
+        target = db.query(Customer).filter(Customer.organization_id == org.id).first()
+        if target:
+            cust_id = target.id
+        else:
+            any_cust = db.query(Customer).first()
+            if any_cust:
+                cust_id = any_cust.id
+            else:
+                new_cust = Customer(
+                    id=str(uuid.uuid4()),
+                    organization_id=org.id,
+                    name="UrbanThread Shopper",
+                    email="shopper@urbanthread.local",
+                    phone="+919876543210",
+                    status="ACTIVE"
+                )
+                db.add(new_cust)
+                db.commit()
+                db.refresh(new_cust)
+                cust_id = new_cust.id
 
     conv = CustomerConversation(
         organization_id=org.id,
@@ -155,7 +181,8 @@ def get_conversation_details(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found.")
 
     # If conversation is bound to a customer, enforce customer ownership if authenticated
-    if conv.customer_id and current_user and current_user.role and current_user.role.name == "CUSTOMER":
+    user_role = getattr(current_user.role, "name", current_user.role) if current_user and current_user.role else ""
+    if conv.customer_id and current_user and user_role == "CUSTOMER":
         if conv.customer_id != current_user.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this conversation.")
 
@@ -197,7 +224,8 @@ def send_message(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found.")
 
     cust_id = conv.customer_id
-    if current_user and current_user.role and current_user.role.name == "CUSTOMER":
+    user_role = getattr(current_user.role, "name", current_user.role) if current_user and current_user.role else ""
+    if current_user and user_role == "CUSTOMER":
         cust_id = current_user.id
 
     client_ip = request.client.host if request.client else "127.0.0.1"

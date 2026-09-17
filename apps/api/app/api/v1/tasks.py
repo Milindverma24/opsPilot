@@ -66,31 +66,127 @@ def list_tasks(
         order_id=order_id,
         limit=limit
     )
-    return {
-        "total": len(tasks),
-        "data": [
-            {
-                "id": t.id,
-                "title": t.title,
-                "description": t.description,
-                "task_type": t.task_type,
+    task_items = [
+        {
+            "id": t.id,
+            "title": t.title,
+            "description": t.description,
+            "task_type": t.task_type,
+            "order_id": t.order_id,
+            "customer_name": t.customer_name,
+            "items_summary": t.items_summary,
+            "priority": t.priority,
+            "status": t.status,
+            "assigned_to": t.assigned_to,
+            "claimed_at": t.claimed_at.isoformat() if t.claimed_at else None,
+            "lease_expires_at": t.lease_expires_at.isoformat() if t.lease_expires_at else None,
+            "due_at": t.due_at.isoformat() if t.due_at else None,
+            "completed_at": t.completed_at.isoformat() if t.completed_at else None,
+            "retry_count": t.retry_count,
+            "error_message": t.error_message,
+            "created_at": t.created_at.isoformat() if t.created_at else None,
+            "payload": {
                 "order_id": t.order_id,
                 "customer_name": t.customer_name,
-                "items_summary": t.items_summary,
-                "priority": t.priority,
-                "status": t.status,
-                "assigned_to": t.assigned_to,
-                "claimed_at": t.claimed_at.isoformat() if t.claimed_at else None,
-                "lease_expires_at": t.lease_expires_at.isoformat() if t.lease_expires_at else None,
-                "due_at": t.due_at.isoformat() if t.due_at else None,
-                "completed_at": t.completed_at.isoformat() if t.completed_at else None,
-                "retry_count": t.retry_count,
-                "error_message": t.error_message,
-                "created_at": t.created_at.isoformat() if t.created_at else None
+                "notes": t.description,
+                "items": t.items_summary,
             }
-            for t in tasks
-        ]
+        }
+        for t in tasks
+    ]
+    return {
+        "total": len(tasks),
+        "data": task_items,
+        "tasks": task_items,
     }
+
+
+@router.post("/recover-stale-leases")
+def recover_stale_leases_endpoint(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Recovers tasks whose worker lease has expired back into the pool."""
+    recovered = TaskService.recover_stale_leases(db, organization_id=current_user.organization_id)
+    return {
+        "status": "success",
+        "recovered_count": len(recovered),
+        "recovered_task_ids": [t.id for t in recovered]
+    }
+
+
+@router.post("/seed-demo-queue")
+def seed_demo_queue(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Populates realistic warehouse fulfillment and QC tasks for testing and visual showcase."""
+    demo_tasks = [
+        {
+            "title": "Pick & Pack Order UT-8921: Oversized Silk Bomber",
+            "description": "Verify size M, Midnight Black. Include UrbanThread care label & wooden hanger.",
+            "task_type": "PICK_AND_PACK",
+            "order_id": "UT-8921",
+            "customer_name": "Rahul Sharma",
+            "items_summary": ["1x Oversized Silk Bomber Jacket (M, Midnight Black)"],
+            "priority": "HIGH",
+        },
+        {
+            "title": "Quality Inspection: Return RET-4029",
+            "description": "Inspect returned Classic Denim Jacket for security tag tampering or wear.",
+            "task_type": "RETURN_INSPECTION",
+            "order_id": "UT-68293",
+            "customer_name": "Pooja Verma",
+            "items_summary": ["1x Classic Denim Jacket (L, Washed Indigo)"],
+            "priority": "CRITICAL",
+        },
+        {
+            "title": "Inventory Audit: Bin A-14 Restock Verification",
+            "description": "Count remaining inventory for 50x Linen Henley Shirts received from Surat mill.",
+            "task_type": "INVENTORY_COUNT",
+            "order_id": "PO-9912",
+            "customer_name": "Devon Stock AI",
+            "items_summary": ["50x Linen Henley Shirt (M, Sage Green)"],
+            "priority": "NORMAL",
+        },
+        {
+            "title": "Priority Express Pack: Order UT-9942",
+            "description": "Same-day courier dispatch via Delhivery Express Air.",
+            "task_type": "PICK_AND_PACK",
+            "order_id": "UT-9942",
+            "customer_name": "Vikram Singhania",
+            "items_summary": ["2x Raw Indigo Selvedge Jeans (32/32)"],
+            "priority": "HIGH",
+        },
+        {
+            "title": "QC Inspection: Supplier Batch B-104",
+            "description": "Random sampling 10 units for GSM fabric weight & seam durability.",
+            "task_type": "QC_INSPECTION",
+            "order_id": "PO-1048",
+            "customer_name": "Priya Purchasing AI",
+            "items_summary": ["100x Organic Cotton Heavy Tee (Black/White)"],
+            "priority": "NORMAL",
+        }
+    ]
+
+    created = []
+    for dt in demo_tasks:
+        t = TaskService.create_task(
+            db=db,
+            organization_id=current_user.organization_id,
+            title=dt["title"],
+            description=dt["description"],
+            task_type=dt["task_type"],
+            order_id=dt["order_id"],
+            customer_name=dt["customer_name"],
+            items_summary=dt["items_summary"],
+            priority=dt["priority"],
+            status="CREATED",
+            created_by=current_user.id
+        )
+        created.append(t.id)
+
+    return {"status": "success", "seeded_count": len(created), "task_ids": created}
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)

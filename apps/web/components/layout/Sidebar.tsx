@@ -148,30 +148,36 @@ export function Sidebar() {
     : "OP";
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col h-screen border-r border-slate-800 shrink-0 select-none">
+    <aside className="w-64 bg-slate-950 text-slate-300 flex flex-col h-screen border-r border-slate-800/80 shrink-0 select-none">
       {/* Brand Header */}
-      <div className="p-5 border-b border-slate-800/80 flex flex-col gap-1">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-black text-white text-lg tracking-tight shadow-md shadow-blue-500/20">
-            OP
+      <div className="p-5 border-b border-slate-800/80 flex flex-col gap-1 bg-slate-900/30">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 flex items-center justify-center font-black text-white text-base tracking-tight shadow-lg shadow-indigo-500/30 ring-1 ring-white/20">
+              <Cpu className="w-5 h-5 text-white" />
+            </div>
+            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 border-2 border-slate-950 rounded-full animate-pulse" />
           </div>
           <div>
-            <h1 className="font-bold text-white text-base tracking-tight leading-tight">
+            <h1 className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-indigo-200 text-base tracking-tight leading-tight">
               OpsPilot
             </h1>
-            <span className="text-[10px] font-medium text-blue-400 uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-cyan-400 tracking-wider flex items-center gap-1 uppercase">
               Autonomous Operations
             </span>
           </div>
         </div>
 
         {/* Organization selector pill */}
-        <div className="mt-3 flex items-center justify-between px-2.5 py-1.5 bg-slate-800/60 rounded-md border border-slate-700/50 text-xs">
+        <div className="mt-3 flex items-center justify-between px-3 py-2 bg-slate-900/90 rounded-xl border border-slate-800 text-xs shadow-inner">
           <div className="flex items-center gap-2 truncate">
-            <Building2 className="w-3.5 h-3.5 text-slate-400" />
+            <div className="w-5 h-5 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+              <Building2 className="w-3 h-3" />
+            </div>
             <span className="font-semibold text-slate-200 truncate">{orgName}</span>
           </div>
-          <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+          <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold flex items-center gap-1 shadow-[0_0_8px_rgba(16,185,129,0.2)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             LIVE
           </span>
         </div>

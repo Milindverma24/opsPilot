@@ -635,6 +635,7 @@ export const api = {
     fail: (id: string, reason: string) =>
       apiFetch<any>(`/tasks/${id}/fail`, { method: "POST", body: JSON.stringify({ reason }) }),
     recoverStale: () => apiFetch<any>("/tasks/recover-stale-leases", { method: "POST" }),
+    seedDemoQueue: () => apiFetch<any>("/tasks/seed-demo-queue", { method: "POST" }),
   },
   tools: {
     list: () => apiFetch<any[]>("/tools"),

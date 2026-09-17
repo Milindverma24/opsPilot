@@ -13,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full bg-slate-50">
-      <body className="h-full antialiased text-slate-900 bg-slate-50 selection:bg-blue-600 selection:text-white">
+    <html lang="en" className="h-full dark bg-[#030712]">
+      <body className="h-full antialiased text-slate-100 bg-[#030712] selection:bg-indigo-500 selection:text-white">
         {children}
         <CustomerChatWidget />
       </body>

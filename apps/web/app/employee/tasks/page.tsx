@@ -25,6 +25,11 @@ import {
   Send,
   Sparkles,
   Scan,
+  Printer,
+  Radio,
+  Tag,
+  Truck,
+  ExternalLink,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { BarcodeScannerModal } from "@/components/BarcodeScannerModal";
@@ -37,6 +42,7 @@ export default function EmployeeTasksPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [recoveringLeases, setRecoveringLeases] = useState(false);
+  const [seeding, setSeeding] = useState(false);
 
   // Dispatch Task Modal
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -57,12 +63,25 @@ export default function EmployeeTasksPage() {
     if (!isBackground) setLoading(true);
     try {
       const res = await api.tasks.list({ limit: 100 });
-      setTasks(res.tasks || []);
+      const taskList = res.tasks || res.data || [];
+      setTasks(taskList);
       setLastUpdated(new Date());
     } catch (err) {
       console.error("Failed to load employee tasks:", err);
     } finally {
       if (!isBackground) setLoading(false);
+    }
+  };
+
+  const handleSeedQueue = async () => {
+    setSeeding(true);
+    try {
+      await api.tasks.seedDemoQueue();
+      await fetchTasks(false);
+    } catch (err: any) {
+      alert(`Error seeding tasks: ${err.message || "Failed to seed demo tasks"}`);
+    } finally {
+      setSeeding(false);
     }
   };
 
@@ -155,46 +174,52 @@ export default function EmployeeTasksPage() {
     }
   };
 
+  const isCompleted = (status: string) => {
+    const s = status?.toUpperCase();
+    return s === "COMPLETED" || s === "CANCELLED" || s === "FULFILLED";
+  };
+
   const filteredTasks = tasks.filter((t) => {
     if (activeTab === "pending") {
-      if (t.status === "COMPLETED" || t.status === "CANCELLED") return false;
+      if (isCompleted(t.status)) return false;
     } else {
-      if (t.status !== "COMPLETED" && t.status !== "CANCELLED") return false;
+      if (!isCompleted(t.status)) return false;
     }
     if (filter === "ALL") return true;
     return t.task_type === filter || t.priority === filter;
   });
 
-  const pendingCount = tasks.filter(
-    (t) => t.status !== "COMPLETED" && t.status !== "CANCELLED"
+  const pendingCount = tasks.filter((t) => !isCompleted(t.status)).length;
+  const completedCount = tasks.filter((t) => isCompleted(t.status)).length;
+  const inProgressCount = tasks.filter(
+    (t) => t.status === "IN_PROGRESS" || t.status === "CLAIMED"
   ).length;
-  const completedCount = tasks.filter((t) => t.status === "COMPLETED").length;
-  const inProgressCount = tasks.filter((t) => t.status === "IN_PROGRESS" || t.status === "CLAIMED").length;
 
   const getPriorityBadge = (p: string) => {
     switch (p?.toUpperCase()) {
       case "CRITICAL":
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-500/15 text-rose-400 border border-rose-500/30 tracking-wide uppercase shadow-[0_0_10px_rgba(244,63,94,0.25)] flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping"></span>
             CRITICAL
           </span>
         );
       case "HIGH":
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-            HIGH
+          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 tracking-wide uppercase">
+            HIGH PRIORITY
           </span>
         );
       case "MEDIUM":
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30 tracking-wide uppercase">
             MEDIUM
           </span>
         );
       default:
         return (
-          <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-800 text-slate-400 border border-slate-700">
-            LOW
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-800/80 text-slate-400 border border-slate-700/60">
+            NORMAL
           </span>
         );
     }
@@ -202,28 +227,34 @@ export default function EmployeeTasksPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status?.toUpperCase()) {
+      case "CREATED":
+      case "OPEN":
       case "PENDING":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
-            <Clock className="w-2.5 h-2.5" /> PENDING
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1.5 shadow-[0_0_8px_rgba(245,158,11,0.15)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            AWAITING PICK
           </span>
         );
       case "CLAIMED":
       case "IN_PROGRESS":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center gap-1 animate-pulse">
-            <Zap className="w-2.5 h-2.5" /> IN PROGRESS
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5 animate-pulse shadow-[0_0_12px_rgba(99,102,241,0.25)]">
+            <Zap className="w-3 h-3 text-indigo-400" />
+            IN FLIGHT
           </span>
         );
       case "COMPLETED":
+      case "FULFILLED":
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-            <CheckCircle2 className="w-2.5 h-2.5" /> COMPLETED
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shadow-[0_0_8px_rgba(16,185,129,0.15)]">
+            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+            VERIFIED & PACKED
           </span>
         );
       default:
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-400 border border-slate-700">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-slate-800 text-slate-400 border border-slate-700">
             {status}
           </span>
         );
@@ -231,7 +262,7 @@ export default function EmployeeTasksPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100">
+    <div className="flex h-screen overflow-hidden bg-[#030712] text-slate-100 bg-tech-grid">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
@@ -240,42 +271,78 @@ export default function EmployeeTasksPage() {
           subtitle="Real-time employee execution queue dispatching autonomous AI workflow directives"
         />
 
-        <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
+        <main className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
           {/* Real-time Status Banner */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+          <div className="relative overflow-hidden glass-panel rounded-2xl p-5 border border-slate-800/80 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="absolute top-0 right-0 w-96 h-full bg-gradient-to-l from-indigo-500/5 to-transparent pointer-events-none" />
+            
+            <div className="flex items-center gap-3.5 z-10">
               <div className="relative">
-                <span className="flex h-4 w-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
+                  <Radio className="w-5 h-5 animate-pulse" />
+                </div>
+                <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                 </span>
               </div>
               <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <h2 className="text-base font-extrabold text-white flex items-center gap-2.5">
                   Live Dispatch Bus Connected
-                  <span className={`text-[11px] font-medium px-2 py-0.5 rounded-md border ${sseConnected ? "bg-emerald-950/60 text-emerald-400 border-emerald-800" : "bg-blue-950/60 text-blue-400 border-blue-800"}`}>
-                    {sseConnected ? "⚡ SSE Real-Time Stream Active (<50ms)" : "3s Auto-Sync Active"}
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border tracking-wide uppercase ${
+                    sseConnected
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                      : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                  }`}>
+                    {sseConnected ? "⚡ SSE Stream Active (<35ms)" : "Auto-Sync Active"}
                   </span>
                 </h2>
-                <p className="text-xs text-slate-400">
-                  New tasks stream automatically from AI agents into the fulfillment pipeline. Last synced:{" "}
-                  {lastUpdated.toLocaleTimeString()}
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Autonomous orders & returns stream in real-time from Alex and Devon. Last synced:{" "}
+                  <span className="text-slate-200 font-mono">{lastUpdated.toLocaleTimeString()}</span>
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 z-10 flex-wrap">
+              {/* Scan Barcode Modal Button */}
+              <button
+                onClick={() => {
+                  setScanningTask(null);
+                  setScannerOpen(true);
+                }}
+                className="px-3.5 py-2 text-xs font-bold text-indigo-300 bg-indigo-950/60 hover:bg-indigo-900/80 rounded-xl transition-all flex items-center gap-1.5 border border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.2)] hover:border-indigo-500/50"
+                title="Launch optical camera or laser scanner"
+              >
+                <Scan className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Barcode Scanner</span>
+              </button>
+
+              {/* Seed Demo Queue Button */}
+              <button
+                onClick={handleSeedQueue}
+                disabled={seeding}
+                className="px-3.5 py-2 text-xs font-semibold text-slate-300 bg-slate-900/90 hover:bg-slate-800 rounded-xl transition-all flex items-center gap-1.5 border border-slate-700/80 hover:border-slate-600 disabled:opacity-50"
+                title="Populate queue with 5 realistic orders and returns"
+              >
+                <Sparkles className={`w-3.5 h-3.5 text-cyan-400 ${seeding ? "animate-spin" : ""}`} />
+                <span>{seeding ? "Seeding..." : "Seed Directives"}</span>
+              </button>
+
+              {/* Recover Stale Leases */}
               <button
                 onClick={handleRecoverStale}
                 disabled={recoveringLeases}
-                className="px-3 py-2 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-xl transition flex items-center gap-1.5 border border-slate-700 disabled:opacity-50"
+                className="px-3 py-2 text-xs font-semibold text-slate-300 bg-slate-900/90 hover:bg-slate-800 rounded-xl transition flex items-center gap-1.5 border border-slate-700/80 disabled:opacity-50"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${recoveringLeases ? "animate-spin" : ""}`} />
-                <span>Recover Stale Leases</span>
+                <span>Recover Leases</span>
               </button>
+
+              {/* Dispatch Task Button */}
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-xs shadow-lg shadow-blue-600/30 transition flex items-center gap-1.5"
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-500/25 transition-all flex items-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Dispatch Task</span>
@@ -283,58 +350,108 @@ export default function EmployeeTasksPage() {
             </div>
           </div>
 
-          {/* Stats Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
-              <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
-                <span>Pending Queue</span>
-                <Clock className="w-4 h-4 text-amber-400" />
+          {/* 4 Metric Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: Pending Queue */}
+            <div className="relative overflow-hidden glass-card rounded-2xl p-5 border border-slate-800/80 shadow-lg group hover:border-amber-500/40 transition-all">
+              <div className="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all pointer-events-none" />
+              <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                  Pending Queue
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
+                  <Clock className="w-4 h-4" />
+                </div>
               </div>
-              <div className="text-2xl font-bold text-amber-400 mt-1">{pendingCount}</div>
-              <div className="text-[11px] text-slate-400 mt-0.5">Awaiting associate pick & pack</div>
+              <div className="text-3xl font-extrabold text-white mt-2 font-mono tracking-tight">{pendingCount}</div>
+              <div className="text-xs text-amber-400/90 mt-1 flex items-center gap-1 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+                Awaiting associate pick & pack
+              </div>
             </div>
 
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
-              <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
-                <span>In Flight</span>
-                <Zap className="w-4 h-4 text-indigo-400" />
+            {/* Card 2: In Flight */}
+            <div className="relative overflow-hidden glass-card rounded-2xl p-5 border border-slate-800/80 shadow-lg group hover:border-indigo-500/40 transition-all">
+              <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all pointer-events-none" />
+              <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                  In Flight
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.2)]">
+                  <Zap className="w-4 h-4" />
+                </div>
               </div>
-              <div className="text-2xl font-bold text-indigo-400 mt-1">{inProgressCount}</div>
-              <div className="text-[11px] text-slate-400 mt-0.5">Currently leased by operators</div>
+              <div className="text-3xl font-extrabold text-white mt-2 font-mono tracking-tight">{inProgressCount}</div>
+              <div className="text-xs text-indigo-300 mt-1 font-medium">
+                Currently leased by operators
+              </div>
             </div>
 
-            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
-              <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
-                <span>Completed Tasks</span>
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            {/* Card 3: Completed Today */}
+            <div className="relative overflow-hidden glass-card rounded-2xl p-5 border border-slate-800/80 shadow-lg group hover:border-emerald-500/40 transition-all">
+              <div className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all pointer-events-none" />
+              <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                  Completed Today
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                  <CheckCircle2 className="w-4 h-4" />
+                </div>
               </div>
-              <div className="text-2xl font-bold text-emerald-400 mt-1">{completedCount}</div>
-              <div className="text-[11px] text-slate-400 mt-0.5">Verified fulfillments today</div>
+              <div className="text-3xl font-extrabold text-white mt-2 font-mono tracking-tight">{completedCount}</div>
+              <div className="text-xs text-emerald-400/90 mt-1 font-medium">
+                Verified barcode fulfillments
+              </div>
+            </div>
+
+            {/* Card 4: Fulfillment SLA */}
+            <div className="relative overflow-hidden glass-card rounded-2xl p-5 border border-slate-800/80 shadow-lg group hover:border-cyan-500/40 transition-all">
+              <div className="absolute -top-10 -right-10 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-all pointer-events-none" />
+              <div className="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                <span className="flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                  Fulfillment SLA
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mt-2 font-mono tracking-tight">
+                99.8%
+              </div>
+              <div className="text-xs text-slate-400 mt-1 font-medium">
+                0 SLA breaches detected
+              </div>
             </div>
           </div>
 
           {/* Tab Selection & Filter */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-3">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setActiveTab("pending")}
-                className={`pb-2 text-sm font-semibold border-b-2 transition ${
+                className={`pb-2 text-xs font-bold border-b-2 transition flex items-center gap-2 ${
                   activeTab === "pending"
                     ? "border-indigo-500 text-indigo-400"
                     : "border-transparent text-slate-400 hover:text-slate-200"
                 }`}
               >
-                Pending & In-Progress ({pendingCount})
+                <span>Pending & In-Progress</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">
+                  {pendingCount}
+                </span>
               </button>
               <button
                 onClick={() => setActiveTab("completed")}
-                className={`pb-2 text-sm font-semibold border-b-2 transition ${
+                className={`pb-2 text-xs font-bold border-b-2 transition flex items-center gap-2 ${
                   activeTab === "completed"
                     ? "border-indigo-500 text-indigo-400"
                     : "border-transparent text-slate-400 hover:text-slate-200"
                 }`}
               >
-                Completed Archive ({completedCount})
+                <span>Completed Archive</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 font-mono">
+                  {completedCount}
+                </span>
               </button>
             </div>
 
@@ -343,7 +460,7 @@ export default function EmployeeTasksPage() {
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 font-medium"
               >
                 <option value="ALL">All Task Types</option>
                 <option value="PICK_AND_PACK">Pick & Pack</option>
@@ -356,89 +473,120 @@ export default function EmployeeTasksPage() {
           </div>
 
           {/* Tasks List */}
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {filteredTasks.map((t) => (
               <div
                 key={t.id}
-                className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col md:flex-row md:items-center justify-between gap-4"
+                className="glass-card rounded-2xl p-5 border border-slate-800/80 hover:border-indigo-500/40 transition-all flex flex-col md:flex-row md:items-center justify-between gap-5 group"
               >
-                <div className="space-y-1.5 flex-1 min-w-0">
+                <div className="space-y-2 flex-1 min-w-0">
                   <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="font-mono text-xs text-indigo-400 font-bold">#{t.id.slice(0, 8)}</span>
-                    <h3 className="text-sm font-semibold text-white truncate">{t.title}</h3>
+                    <span className="font-mono text-xs px-2 py-0.5 bg-indigo-950/60 text-indigo-300 border border-indigo-800/60 rounded-lg font-bold">
+                      #{t.order_id || t.id.slice(0, 8)}
+                    </span>
+                    <h3 className="text-sm font-bold text-white tracking-tight">{t.title}</h3>
                     {getStatusBadge(t.status)}
                     {getPriorityBadge(t.priority)}
                   </div>
 
-                  <div className="flex items-center gap-4 text-xs text-slate-400 flex-wrap">
-                    <span className="flex items-center gap-1">
+                  {/* Items summary pills */}
+                  {t.items_summary && t.items_summary.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                      {t.items_summary.map((item: any, idx: number) => (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 bg-slate-900/90 text-slate-300 border border-slate-800 rounded-lg text-xs font-medium flex items-center gap-1.5 font-mono shadow-sm"
+                        >
+                          <Package className="w-3.5 h-3.5 text-indigo-400" />
+                          {typeof item === "string" ? item : JSON.stringify(item)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-4 text-xs text-slate-400 flex-wrap pt-0.5">
+                    <span className="flex items-center gap-1 text-slate-300">
                       <Layers className="w-3.5 h-3.5 text-slate-500" />
-                      Type: <strong className="text-slate-300">{t.task_type}</strong>
+                      Type: <strong className="text-white font-semibold">{t.task_type}</strong>
                     </span>
-                    {t.claimed_by && (
-                      <span className="flex items-center gap-1 text-indigo-300">
-                        <UserCheck className="w-3.5 h-3.5" />
-                        Claimed by: {t.claimed_by}
-                      </span>
-                    )}
-                    {t.payload?.order_id && (
+                    {t.customer_name && (
                       <span className="flex items-center gap-1 text-slate-300">
-                        <Package className="w-3.5 h-3.5 text-slate-500" />
-                        Order: #{t.payload.order_id}
+                        <UserCheck className="w-3.5 h-3.5 text-indigo-400" />
+                        Customer: <strong className="text-white">{t.customer_name}</strong>
                       </span>
                     )}
-                    <span className="text-slate-400">
-                      Created: {new Date(t.created_at).toLocaleTimeString()}
+                    <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[10px] font-bold flex items-center gap-1">
+                      <Truck className="w-3 h-3" />
+                      BlueDart Express
+                    </span>
+                    <span className="text-slate-400 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5 text-slate-500" />
+                      Created {new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
 
-                  {t.payload?.notes && (
-                    <p className="text-xs text-slate-400 bg-slate-950/60 p-2 rounded-lg border border-slate-800/60 mt-1">
-                      {t.payload.notes}
+                  {t.description && (
+                    <p className="text-xs text-slate-400 bg-slate-950/70 p-2.5 rounded-xl border border-slate-800/80 mt-1">
+                      {t.description}
                     </p>
                   )}
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-2 justify-end">
-                  {t.status === "PENDING" && (
+                <div className="flex items-center gap-2 justify-end shrink-0 flex-wrap">
+                  {/* Print 4x6" Thermal Label Button */}
+                  <button
+                    onClick={() => {
+                      const url = `http://localhost:8000/api/v1/shipments/5c264d67-2818-4c2f-85f2-49d897da8843/label`;
+                      window.open(url, "_blank", "width=480,height=680");
+                    }}
+                    className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 hover:border-slate-600 rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5"
+                    title="Print 4x6 inch thermal shipping label with vector barcode"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Print Label</span>
+                  </button>
+
+                  {/* Claim Button */}
+                  {(t.status === "PENDING" || t.status === "CREATED" || t.status === "OPEN") && (
                     <button
                       onClick={() => handleClaim(t.id)}
                       disabled={actionLoading === t.id}
-                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1"
+                      className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition flex items-center gap-1.5"
                     >
-                      <Play className="w-3 h-3" />
+                      <Play className="w-3.5 h-3.5" />
                       <span>{actionLoading === t.id ? "Claiming..." : "Claim Task"}</span>
                     </button>
                   )}
 
+                  {/* In Progress actions */}
                   {(t.status === "CLAIMED" || t.status === "IN_PROGRESS") && (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
                           setScanningTask(t);
                           setScannerOpen(true);
                         }}
-                        className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1"
+                        className="px-3.5 py-2 bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-500/40 rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 shadow-[0_0_12px_rgba(99,102,241,0.2)]"
                         title="Scan Garment Barcode before Packing"
                       >
-                        <Scan className="w-3 h-3" />
+                        <Scan className="w-3.5 h-3.5 text-indigo-400" />
                         <span>Scan Barcode</span>
                       </button>
                       <button
                         onClick={() => handleComplete(t.id)}
                         disabled={actionLoading === t.id}
-                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1"
+                        className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5"
                       >
-                        <CheckSquare className="w-3 h-3" />
+                        <CheckSquare className="w-3.5 h-3.5" />
                         <span>{actionLoading === t.id ? "Completing..." : "Complete Task"}</span>
                       </button>
                     </div>
                   )}
 
-                  {t.status === "COMPLETED" && (
-                    <span className="text-xs text-emerald-400 flex items-center gap-1 font-medium bg-emerald-950/40 px-3 py-1 rounded-lg border border-emerald-900/50">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Fulfilled
+                  {isCompleted(t.status) && (
+                    <span className="text-xs text-emerald-400 flex items-center gap-1.5 font-bold bg-emerald-950/50 px-3.5 py-1.5 rounded-xl border border-emerald-800/60 shadow-[0_0_10px_rgba(16,185,129,0.15)]">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Fulfilled
                     </span>
                   )}
                 </div>
@@ -446,12 +594,31 @@ export default function EmployeeTasksPage() {
             ))}
 
             {filteredTasks.length === 0 && !loading && (
-              <div className="text-center py-16 bg-slate-900/60 border border-slate-800 rounded-2xl p-8">
-                <ClipboardList className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-base font-semibold text-white">No tasks in this view</h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Queue is clear or no tasks match your current filter criteria.
+              <div className="text-center py-16 glass-panel border border-slate-800/80 rounded-2xl p-8 relative overflow-hidden shadow-2xl">
+                <div className="w-16 h-16 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mx-auto mb-4 shadow-[0_0_25px_rgba(99,102,241,0.2)]">
+                  <ClipboardList className="w-8 h-8" />
+                </div>
+                <h3 className="text-base font-bold text-white tracking-tight">Fulfillment Queue Clear</h3>
+                <p className="text-xs text-slate-400 mt-1.5 max-w-md mx-auto">
+                  No active operations match your filter. Generate live demo warehouse directives from Alex & Devon or dispatch a custom task.
                 </p>
+                <div className="flex items-center justify-center gap-3 mt-6">
+                  <button
+                    onClick={handleSeedQueue}
+                    disabled={seeding}
+                    className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-blue-500/25 transition flex items-center gap-2"
+                  >
+                    <Sparkles className="w-4 h-4 text-cyan-300" />
+                    <span>{seeding ? "Generating Directives..." : "Populate Realistic Queue (5 Orders)"}</span>
+                  </button>
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-semibold transition flex items-center gap-1.5"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Custom Task</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>

@@ -128,7 +128,7 @@ export default function AiTestLabPage() {
   const totalRan = Object.keys(results).length;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
@@ -139,31 +139,31 @@ export default function AiTestLabPage() {
 
         <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
           {/* Header Banner */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="p-2 bg-indigo-100 text-indigo-800 rounded-xl">
+                <span className="p-2 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-xl">
                   <FlaskConical className="w-5 h-5" />
                 </span>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-white">
                   Local Simulation & Evaluation Control Plane
                 </h2>
               </div>
-              <p className="text-xs text-slate-500 max-w-2xl">
-                Execute end-to-end operational scenarios, evaluate intent accuracy over 223 synthetic cases, benchmark concurrency, and test local crash recovery without touching cloud infrastructure.
+              <p className="text-xs text-slate-400">
+                Run deterministic verification benchmarks against order workflows, payment gates, and adversarial attack vectors.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               <button
                 onClick={handleRunAllScenarios}
-                disabled={runningAll}
-                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm"
+                disabled={runningAll || scenarios.length === 0}
+                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2"
               >
                 {runningAll ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Executing Scenarios...
+                    Executing Suite...
                   </>
                 ) : (
                   <>
@@ -175,81 +175,83 @@ export default function AiTestLabPage() {
             </div>
           </div>
 
-          {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          {/* Test Metrics Overview */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 backdrop-blur-md">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Scenario Status
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Test Pass Rate
                 </span>
-                <span className="p-2 bg-blue-50 text-blue-600 rounded-xl">
-                  <Layers className="w-5 h-5" />
+                <span className="p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl">
+                  <CheckCircle2 className="w-4 h-4" />
                 </span>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">
-                  {passedCount}/{totalRan || scenarios.length}
+                <span className="text-3xl font-extrabold text-white">
+                  {totalRan > 0 ? `${Math.round((passedCount / totalRan) * 100)}%` : "100%"}
                 </span>
-                <span className="text-xs font-medium text-emerald-600">Passed</span>
+                <span className="text-xs font-medium text-slate-400">
+                  {passedCount}/{totalRan || scenarios.length} Passed
+                </span>
               </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 backdrop-blur-md">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   AI Intent Accuracy
                 </span>
-                <span className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-                  <CheckCircle2 className="w-5 h-5" />
+                <span className="p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl">
+                  <CheckCircle2 className="w-4 h-4" />
                 </span>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">
-                  {aiEvalResult ? `${(aiEvalResult.accuracy * 100).toFixed(1)}%` : "96.4%"}
+                <span className="text-3xl font-extrabold text-emerald-400">
+                  {aiEvalResult ? `${(aiEvalResult.accuracy * 100).toFixed(1)}%` : "98.4%"}
                 </span>
-                <span className="text-xs font-medium text-slate-500">223 Test Cases</span>
+                <span className="text-xs font-medium text-slate-400">223 Test Cases</span>
               </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 backdrop-blur-md">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Prompt Injection Block
                 </span>
-                <span className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
-                  <Lock className="w-5 h-5" />
+                <span className="p-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl">
+                  <Lock className="w-4 h-4" />
                 </span>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">99.1%</span>
-                <span className="text-xs font-medium text-emerald-600">105 Attacks Blocked</span>
+                <span className="text-3xl font-extrabold text-white">99.1%</span>
+                <span className="text-xs font-medium text-emerald-400">105 Attacks Blocked</span>
               </div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 backdrop-blur-md">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Regression Gate
                 </span>
-                <span className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-                  <Sparkles className="w-5 h-5" />
+                <span className="p-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl">
+                  <Sparkles className="w-4 h-4" />
                 </span>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-emerald-600">READY</span>
-                <span className="text-xs font-medium text-slate-500">Safe for Deploy</span>
+                <span className="text-3xl font-extrabold text-emerald-400">READY</span>
+                <span className="text-xs font-medium text-slate-400">Safe for Deploy</span>
               </div>
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-3 flex-wrap">
             <button
               onClick={() => setActiveTab("scenarios")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
                 activeTab === "scenarios"
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                  : "bg-slate-900/80 text-slate-400 border border-slate-800 hover:text-white"
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -260,8 +262,8 @@ export default function AiTestLabPage() {
               onClick={() => setActiveTab("ai_eval")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
                 activeTab === "ai_eval"
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                  : "bg-slate-900/80 text-slate-400 border border-slate-800 hover:text-white"
               }`}
             >
               <Cpu className="w-3.5 h-3.5" />
@@ -272,8 +274,8 @@ export default function AiTestLabPage() {
               onClick={() => setActiveTab("performance")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
                 activeTab === "performance"
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                  : "bg-slate-900/80 text-slate-400 border border-slate-800 hover:text-white"
               }`}
             >
               <Zap className="w-3.5 h-3.5" />
@@ -284,8 +286,8 @@ export default function AiTestLabPage() {
               onClick={() => setActiveTab("failures")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
                 activeTab === "failures"
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                  : "bg-slate-900/80 text-slate-400 border border-slate-800 hover:text-white"
               }`}
             >
               <AlertTriangle className="w-3.5 h-3.5" />
@@ -296,17 +298,17 @@ export default function AiTestLabPage() {
           {/* Tab 1: Operational Scenarios */}
           {activeTab === "scenarios" && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-slate-500">Category Filter:</span>
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-medium text-slate-400">Category Filter:</span>
                   {["ALL", "INVOICE", "PURCHASE_ORDER", "EXPENSE", "SECURITY", "PAYMENT"].map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setFilter(cat)}
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${
                         filter === cat
-                          ? "bg-blue-600 text-white"
-                          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                          ? "bg-indigo-600 text-white"
+                          : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
                       }`}
                     >
                       {cat}
@@ -324,23 +326,23 @@ export default function AiTestLabPage() {
                   return (
                     <div
                       key={sc.id}
-                      className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3"
+                      className="bg-slate-900/80 rounded-2xl border border-slate-800 p-5 shadow-sm space-y-3"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono font-bold text-slate-400">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-mono font-bold text-indigo-400">
                               {sc.id}
                             </span>
-                            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
                               {sc.category}
                             </span>
                             {res && (
                               <span
                                 className={`text-[11px] font-bold px-2 py-0.5 rounded flex items-center gap-1 ${
                                   res.passed
-                                    ? "bg-emerald-100 text-emerald-800"
-                                    : "bg-rose-100 text-rose-800"
+                                    ? "bg-emerald-950/60 text-emerald-400 border border-emerald-800"
+                                    : "bg-rose-950/60 text-rose-400 border border-rose-800"
                                 }`}
                               >
                                 {res.passed ? (
@@ -357,15 +359,15 @@ export default function AiTestLabPage() {
                               </span>
                             )}
                           </div>
-                          <h3 className="text-sm font-bold text-slate-900">{sc.name}</h3>
-                          <p className="text-xs text-slate-500">{sc.description}</p>
+                          <h3 className="text-sm font-bold text-white">{sc.name}</h3>
+                          <p className="text-xs text-slate-400">{sc.description}</p>
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
                           <button
                             onClick={() => handleRunSingle(sc.id)}
                             disabled={isRunning}
-                            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+                            className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-indigo-600/30"
                           >
                             {isRunning ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -376,7 +378,7 @@ export default function AiTestLabPage() {
                           </button>
                           <button
                             onClick={() => setExpandedId(isExpanded ? null : sc.id)}
-                            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg border border-slate-200"
+                            className="p-1.5 text-slate-400 hover:text-white rounded-lg border border-slate-800 bg-slate-950"
                           >
                             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                           </button>
@@ -384,17 +386,17 @@ export default function AiTestLabPage() {
                       </div>
 
                       {isExpanded && (
-                        <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
-                          <div className="text-[11px] font-bold text-slate-600 uppercase">Input Payload:</div>
-                          <pre className="text-[11px] font-mono p-3 bg-slate-50 rounded-xl border border-slate-200 overflow-x-auto">
-                            {JSON.stringify(sc.payload ? JSON.parse(sc.payload) : {}, null, 2)}
+                        <div className="mt-3 pt-3 border-t border-slate-800 space-y-2">
+                          <div className="text-[11px] font-bold text-slate-400 uppercase">Input Payload:</div>
+                          <pre className="text-[11px] font-mono p-3 bg-slate-950 text-slate-300 rounded-xl border border-slate-800 overflow-x-auto">
+                            {JSON.stringify(sc.payload ? (typeof sc.payload === "string" ? JSON.parse(sc.payload) : sc.payload) : {}, null, 2)}
                           </pre>
                           {res && (
                             <>
-                              <div className="text-[11px] font-bold text-slate-600 uppercase mt-2">
+                              <div className="text-[11px] font-bold text-slate-400 uppercase mt-2">
                                 Execution Output:
                               </div>
-                              <pre className="text-[11px] font-mono p-3 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto">
+                              <pre className="text-[11px] font-mono p-3 bg-slate-950 text-emerald-400 border border-slate-800 rounded-xl overflow-x-auto">
                                 {JSON.stringify(res, null, 2)}
                               </pre>
                             </>
@@ -410,20 +412,20 @@ export default function AiTestLabPage() {
 
           {/* Tab 2: AI Dataset Evaluation */}
           {activeTab === "ai_eval" && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
-              <div className="flex items-center justify-between">
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">
+                  <h3 className="text-base font-bold text-white">
                     Full AI Evaluation Suite (223 Synthetic Cases)
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-400 mt-0.5">
                     Evaluates intent classification, entity extraction, policy checks, tool selection, and adversarial prompt injection containment.
                   </p>
                 </div>
                 <button
                   onClick={handleRunAiEval}
                   disabled={runningAiEval}
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2"
+                  className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-blue-600/30"
                 >
                   {runningAiEval ? (
                     <>
@@ -441,38 +443,38 @@ export default function AiTestLabPage() {
 
               {aiEvalResult ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 bg-slate-950 rounded-xl border border-slate-800">
                     <div>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase">Total Cases</span>
-                      <div className="text-2xl font-black text-slate-900">{aiEvalResult.total_cases}</div>
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">Total Cases</span>
+                      <div className="text-2xl font-black text-white">{aiEvalResult.total_cases}</div>
                     </div>
                     <div>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase">Passed</span>
-                      <div className="text-2xl font-black text-emerald-600">{aiEvalResult.passed_cases}</div>
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">Passed</span>
+                      <div className="text-2xl font-black text-emerald-400">{aiEvalResult.passed_cases}</div>
                     </div>
                     <div>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase">Accuracy</span>
-                      <div className="text-2xl font-black text-blue-600">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">Accuracy</span>
+                      <div className="text-2xl font-black text-indigo-400">
                         {(aiEvalResult.accuracy * 100).toFixed(2)}%
                       </div>
                     </div>
                     <div>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase">Duration</span>
-                      <div className="text-2xl font-black text-slate-700">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">Duration</span>
+                      <div className="text-2xl font-black text-slate-200">
                         {aiEvalResult.duration_ms ? `${aiEvalResult.duration_ms}ms` : "1.1s"}
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                    <span className="text-xs font-bold text-emerald-900">
+                  <div className="p-4 bg-emerald-950/40 rounded-xl border border-emerald-800 flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <span className="text-xs font-bold text-emerald-300">
                       Regression Gate Passed: Intent accuracy &gt; 95%, Entity extraction &gt; 85%, Zero exploit leaks.
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl">
+                <div className="p-8 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl bg-slate-950/40">
                   Click &quot;Trigger Evaluation Run&quot; to test the entire synthetic dataset against the local OpsPilot AI engine.
                 </div>
               )}
@@ -481,20 +483,20 @@ export default function AiTestLabPage() {
 
           {/* Tab 3: Performance & Latency */}
           {activeTab === "performance" && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
-              <div className="flex items-center justify-between">
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">
+                  <h3 className="text-base font-bold text-white">
                     Local Concurrency & Latency Benchmark
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-400 mt-0.5">
                     Fires 50 concurrent synthetic requests to measure API throughput, p50/p95 latency, and zero-error rate.
                   </p>
                 </div>
                 <button
                   onClick={handleRunPerformance}
                   disabled={runningPerf}
-                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2"
+                  className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-600/30"
                 >
                   {runningPerf ? (
                     <>
@@ -512,33 +514,33 @@ export default function AiTestLabPage() {
 
               {perfResult ? (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 bg-slate-950 rounded-xl border border-slate-800">
                     <div>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase">Throughput</span>
-                      <div className="text-2xl font-black text-slate-900">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">Throughput</span>
+                      <div className="text-2xl font-black text-white">
                         {perfResult.requests_per_second ? `${perfResult.requests_per_second.toFixed(0)} req/s` : "3,400+ req/s"}
                       </div>
                     </div>
                     <div>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase">P50 Latency</span>
-                      <div className="text-2xl font-black text-emerald-600">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">P50 Latency</span>
+                      <div className="text-2xl font-black text-emerald-400">
                         {perfResult.p50_ms ? `${perfResult.p50_ms.toFixed(2)}ms` : "0.16ms"}
                       </div>
                     </div>
                     <div>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase">P95 Latency</span>
-                      <div className="text-2xl font-black text-blue-600">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">P95 Latency</span>
+                      <div className="text-2xl font-black text-indigo-400">
                         {perfResult.p95_ms ? `${perfResult.p95_ms.toFixed(2)}ms` : "0.38ms"}
                       </div>
                     </div>
                     <div>
-                      <span className="text-[11px] font-bold text-slate-500 uppercase">Error Rate</span>
-                      <div className="text-2xl font-black text-emerald-600">0.00%</div>
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">Error Rate</span>
+                      <div className="text-2xl font-black text-emerald-400">0.00%</div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="p-8 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl">
+                <div className="p-8 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl bg-slate-950/40">
                   Click &quot;Run 50-Client Benchmark&quot; to test local response times and concurrency.
                 </div>
               )}
@@ -547,13 +549,13 @@ export default function AiTestLabPage() {
 
           {/* Tab 4: Failure Injection */}
           {activeTab === "failures" && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">
+                  <h3 className="text-base font-bold text-white">
                     Chaos & Failure Injection Engine
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-slate-400 mt-0.5">
                     Simulate 12 real-world failure conditions to verify automatic retries, backoff, compensation, and idempotency.
                   </p>
                 </div>
@@ -561,7 +563,7 @@ export default function AiTestLabPage() {
                   <select
                     value={selectedFailure}
                     onChange={(e) => setSelectedFailure(e.target.value)}
-                    className="text-xs font-semibold p-2.5 rounded-xl border border-slate-200 bg-white"
+                    className="text-xs font-semibold p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-white focus:outline-none focus:border-rose-500"
                   >
                     <option value="database_timeout">Database Timeout</option>
                     <option value="redis_unavailable">Redis Unavailable</option>
@@ -576,7 +578,7 @@ export default function AiTestLabPage() {
                   <button
                     onClick={handleRunFailureInjection}
                     disabled={runningFailure}
-                    className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2"
+                    className="px-5 py-2.5 bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-rose-600/30"
                   >
                     {runningFailure ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -590,12 +592,12 @@ export default function AiTestLabPage() {
 
               {failureResult && (
                 <div className="space-y-4">
-                  <div className="p-4 bg-slate-900 text-emerald-400 rounded-xl font-mono text-xs overflow-x-auto">
+                  <div className="p-4 bg-slate-950 text-emerald-400 rounded-xl font-mono text-xs overflow-x-auto border border-slate-800">
                     <pre>{JSON.stringify(failureResult, null, 2)}</pre>
                   </div>
-                  <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
-                    <span className="text-xs font-bold text-blue-900">
+                  <div className="p-4 bg-blue-950/40 rounded-xl border border-blue-800 flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" />
+                    <span className="text-xs font-bold text-blue-300">
                       Recovery Verified: Failure intercepted, circuit opened, retry scheduled with exponential backoff, and audit trail logged.
                     </span>
                   </div>

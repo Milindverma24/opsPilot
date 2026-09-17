@@ -206,6 +206,58 @@ def list_ai_employees(
     return {"data": data}
 
 
+class CreateAIEmployeeRequest(BaseModel):
+    name: str
+    role: str
+    description: Optional[str] = "Autonomous operations worker"
+    permissions: Optional[List[str]] = []
+    llm_model: Optional[str] = "gpt-4o-mini"
+
+
+@router.post("/ai/employees")
+def create_ai_employee(
+    payload: CreateAIEmployeeRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Deploys a new autonomous AI employee into the fleet."""
+    import datetime
+    emp = AIEmployee(
+        organization_id=current_user.organization_id,
+        name=payload.name,
+        role=payload.role,
+        description=payload.description,
+        status="ONLINE",
+        health="HEALTHY",
+        current_task="Idle — Ready for task assignment",
+        queue_size=0,
+        completed_tasks_count=0,
+        failed_tasks_count=0,
+        total_latency_ms=0,
+        last_heartbeat_at=datetime.datetime.utcnow(),
+        permissions=payload.permissions or ["orders.read", "support.read", "knowledge.read"],
+        configuration={"model": payload.llm_model or "gpt-4o-mini", "provider": "deterministic"},
+        llm_provider="deterministic",
+        llm_model=payload.llm_model or "gpt-4o-mini",
+        max_steps=12,
+        max_replans=3,
+        timeout_seconds=120
+    )
+    db.add(emp)
+    db.commit()
+    db.refresh(emp)
+    return {
+        "message": f"AI Employee {emp.name} deployed successfully",
+        "data": {
+            "id": emp.id,
+            "name": emp.name,
+            "role": emp.role,
+            "status": emp.status,
+            "health": emp.health
+        }
+    }
+
+
 @router.get("/ai/employees/{id}")
 def get_ai_employee_detail(
     id: str,

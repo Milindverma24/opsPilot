@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
@@ -20,6 +20,10 @@ import {
   Layers,
   ChevronRight,
   ShieldAlert,
+  Plus,
+  X,
+  Send,
+  Sparkles,
 } from "lucide-react";
 import { api } from "@/lib/api";
 
@@ -31,6 +35,16 @@ export default function EmployeeTasksPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [recoveringLeases, setRecoveringLeases] = useState(false);
+
+  // Dispatch Task Modal
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [title, setTitle] = useState("");
+  const [taskType, setTaskType] = useState("PICK_AND_PACK");
+  const [priority, setPriority] = useState("HIGH");
+  const [assignedRole, setAssignedRole] = useState("WAREHOUSE_OPERATOR");
+  const [orderId, setOrderId] = useState("");
+  const [notes, setNotes] = useState("");
 
   const fetchTasks = async (isBackground = false) => {
     if (!isBackground) setLoading(true);
@@ -45,7 +59,6 @@ export default function EmployeeTasksPage() {
     }
   };
 
-  // Real-time polling every 3 seconds (no manual refresh needed)
   useEffect(() => {
     fetchTasks();
     const interval = setInterval(() => {
@@ -85,12 +98,37 @@ export default function EmployeeTasksPage() {
     setRecoveringLeases(true);
     try {
       const res = await api.tasks.recoverStale();
-      alert(`Lease Recovery: ${res.recovered_count} stale leases recovered.`);
+      alert(`Lease Recovery: ${res.recovered_count || 0} stale leases recovered.`);
       await fetchTasks(true);
     } catch (err: any) {
       alert(`Error recovering leases: ${err.message}`);
     } finally {
       setRecoveringLeases(false);
+    }
+  };
+
+  const handleCreateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+    setCreating(true);
+    try {
+      await api.tasks.create({
+        title: title.trim(),
+        description: notes.trim() || undefined,
+        task_type: taskType,
+        priority,
+        order_id: orderId.trim() || undefined,
+        assigned_to: assignedRole,
+      });
+      setShowCreateModal(false);
+      setTitle("");
+      setOrderId("");
+      setNotes("");
+      await fetchTasks(true);
+    } catch (err: any) {
+      alert(`Error dispatching task: ${err.message || "Unknown error"}`);
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -108,9 +146,69 @@ export default function EmployeeTasksPage() {
     (t) => t.status !== "COMPLETED" && t.status !== "CANCELLED"
   ).length;
   const completedCount = tasks.filter((t) => t.status === "COMPLETED").length;
+  const inProgressCount = tasks.filter((t) => t.status === "IN_PROGRESS" || t.status === "CLAIMED").length;
+
+  const getPriorityBadge = (p: string) => {
+    switch (p?.toUpperCase()) {
+      case "CRITICAL":
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+            CRITICAL
+          </span>
+        );
+      case "HIGH":
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            HIGH
+          </span>
+        );
+      case "MEDIUM":
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            MEDIUM
+          </span>
+        );
+      default:
+        return (
+          <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-800 text-slate-400 border border-slate-700">
+            LOW
+          </span>
+        );
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case "PENDING":
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+            <Clock className="w-2.5 h-2.5" /> PENDING
+          </span>
+        );
+      case "CLAIMED":
+      case "IN_PROGRESS":
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 flex items-center gap-1 animate-pulse">
+            <Zap className="w-2.5 h-2.5" /> IN PROGRESS
+          </span>
+        );
+      case "COMPLETED":
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+            <CheckCircle2 className="w-2.5 h-2.5" /> COMPLETED
+          </span>
+        );
+      default:
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-400 border border-slate-700">
+            {status}
+          </span>
+        );
+    }
+  };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
@@ -121,7 +219,7 @@ export default function EmployeeTasksPage() {
 
         <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
           {/* Real-time Status Banner */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <span className="flex h-4 w-4">
@@ -130,14 +228,14 @@ export default function EmployeeTasksPage() {
                 </span>
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
                   Live Dispatch Bus Connected
-                  <span className="text-xs font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    3s Polling Active
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-950/60 text-emerald-400 border border-emerald-800">
+                    3s Auto-Sync Active
                   </span>
                 </h2>
-                <p className="text-xs text-slate-500">
-                  New orders and AI workflow requirements populate automatically without page refresh. Last synced:{" "}
+                <p className="text-xs text-slate-400">
+                  New tasks stream automatically from AI agents into the fulfillment pipeline. Last synced:{" "}
                   {lastUpdated.toLocaleTimeString()}
                 </p>
               </div>
@@ -147,297 +245,310 @@ export default function EmployeeTasksPage() {
               <button
                 onClick={handleRecoverStale}
                 disabled={recoveringLeases}
-                className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-2 border border-slate-200 disabled:opacity-50"
+                className="px-3 py-2 text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-xl transition flex items-center gap-1.5 border border-slate-700 disabled:opacity-50"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${recoveringLeases ? "animate-spin" : ""}`} />
-                Recover Stale Leases
+                <span>Recover Stale Leases</span>
               </button>
               <button
-                onClick={() => fetchTasks()}
-                className="px-3.5 py-2 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition flex items-center gap-2 border border-blue-200"
+                onClick={() => setShowCreateModal(true)}
+                className="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-xs shadow-lg shadow-blue-600/30 transition flex items-center gap-1.5"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
-                Force Refresh
+                <Plus className="w-3.5 h-3.5" />
+                <span>Dispatch Task</span>
               </button>
             </div>
           </div>
 
-          {/* Metric Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Pending Tasks
-                </span>
-                <span className="p-2 bg-amber-50 text-amber-600 rounded-xl">
-                  <Clock className="w-5 h-5" />
-                </span>
+          {/* Stats Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
+              <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
+                <span>Pending Queue</span>
+                <Clock className="w-4 h-4 text-amber-400" />
               </div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">{pendingCount}</span>
-                <span className="text-xs font-medium text-amber-600">Requires Action</span>
-              </div>
+              <div className="text-2xl font-bold text-amber-400 mt-1">{pendingCount}</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">Awaiting associate pick & pack</div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Completed Today
-                </span>
-                <span className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-                  <CheckCircle2 className="w-5 h-5" />
-                </span>
+            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
+              <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
+                <span>In Flight</span>
+                <Zap className="w-4 h-4 text-indigo-400" />
               </div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">{completedCount}</span>
-                <span className="text-xs font-medium text-emerald-600">SLA 100%</span>
-              </div>
+              <div className="text-2xl font-bold text-indigo-400 mt-1">{inProgressCount}</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">Currently leased by operators</div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Pick & Pack Queue
-                </span>
-                <span className="p-2 bg-blue-50 text-blue-600 rounded-xl">
-                  <Package className="w-5 h-5" />
-                </span>
+            <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4">
+              <div className="flex items-center justify-between text-slate-400 text-xs font-medium">
+                <span>Completed Tasks</span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               </div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">
-                  {tasks.filter((t) => t.task_type === "PICK_AND_PACK" && t.status !== "COMPLETED").length}
-                </span>
-                <span className="text-xs font-medium text-blue-600">Warehouse Tier 1</span>
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  High Priority
-                </span>
-                <span className="p-2 bg-rose-50 text-rose-600 rounded-xl">
-                  <ShieldAlert className="w-5 h-5" />
-                </span>
-              </div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-slate-900">
-                  {tasks.filter((t) => (t.priority === "URGENT" || t.priority === "HIGH") && t.status !== "COMPLETED").length}
-                </span>
-                <span className="text-xs font-medium text-rose-600">Immediate</span>
-              </div>
+              <div className="text-2xl font-bold text-emerald-400 mt-1">{completedCount}</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">Verified fulfillments today</div>
             </div>
           </div>
 
-          {/* Filter & Tabs Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-200 pb-4">
-            <div className="flex items-center gap-2">
+          {/* Tab Selection & Filter */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-3">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setActiveTab("pending")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                className={`pb-2 text-sm font-semibold border-b-2 transition ${
                   activeTab === "pending"
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                    ? "border-indigo-500 text-indigo-400"
+                    : "border-transparent text-slate-400 hover:text-slate-200"
                 }`}
               >
-                <ClipboardList className="w-3.5 h-3.5" />
-                Active Queue ({pendingCount})
+                Pending & In-Progress ({pendingCount})
               </button>
               <button
                 onClick={() => setActiveTab("completed")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+                className={`pb-2 text-sm font-semibold border-b-2 transition ${
                   activeTab === "completed"
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                    ? "border-indigo-500 text-indigo-400"
+                    : "border-transparent text-slate-400 hover:text-slate-200"
                 }`}
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                History ({completedCount})
+                Completed Archive ({completedCount})
               </button>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-slate-500">Filter:</span>
-              {["ALL", "PICK_AND_PACK", "INVENTORY_VERIFICATION", "HIGH"].map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition ${
-                    filter === f
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-                  }`}
-                >
-                  {f.replace("_", " ")}
-                </button>
-              ))}
+              <span className="text-xs text-slate-400 font-medium">Filter Type:</span>
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="ALL">All Task Types</option>
+                <option value="PICK_AND_PACK">Pick & Pack</option>
+                <option value="INVENTORY_COUNT">Inventory Count</option>
+                <option value="RETURN_INSPECTION">Return Inspection</option>
+                <option value="CRITICAL">Critical Priority</option>
+                <option value="HIGH">High Priority</option>
+              </select>
             </div>
           </div>
 
           {/* Tasks List */}
-          {loading ? (
-            <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-              <RefreshCw className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-3" />
-              <p className="text-sm font-medium text-slate-600">Loading task queue...</p>
-            </div>
-          ) : filteredTasks.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center">
-              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-slate-900">Task Queue Clear</h3>
-              <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                No tasks matching the selected filter. As customer orders arrive or AI workflows require human touch, new tasks will appear here automatically.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {filteredTasks.map((t) => {
-                const isClaimed = t.status === "CLAIMED" || t.status === "IN_PROGRESS";
-                const isCompleted = t.status === "COMPLETED";
-                const orderData = t.payload?.order;
-                const items = t.payload?.items || (orderData?.items ? orderData.items : []);
-
-                return (
-                  <div
-                    key={t.id}
-                    className={`bg-white rounded-2xl border transition shadow-sm hover:shadow-md p-6 ${
-                      t.priority === "URGENT"
-                        ? "border-rose-300 bg-rose-50/20"
-                        : t.priority === "HIGH"
-                        ? "border-amber-300"
-                        : "border-slate-200"
-                    }`}
-                  >
-                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                      {/* Left: Task Identity & Description */}
-                      <div className="space-y-2 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span
-                            className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-                              t.status === "COMPLETED"
-                                ? "bg-emerald-100 text-emerald-800"
-                                : t.status === "IN_PROGRESS"
-                                ? "bg-blue-100 text-blue-800"
-                                : t.status === "CLAIMED"
-                                ? "bg-indigo-100 text-indigo-800"
-                                : "bg-amber-100 text-amber-800"
-                            }`}
-                          >
-                            {t.status.replace("_", " ")}
-                          </span>
-
-                          <span
-                            className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase ${
-                              t.priority === "URGENT"
-                                ? "bg-rose-100 text-rose-800"
-                                : t.priority === "HIGH"
-                                ? "bg-orange-100 text-orange-800"
-                                : "bg-slate-100 text-slate-700"
-                            }`}
-                          >
-                            {t.priority} Priority
-                          </span>
-
-                          <span className="text-xs font-mono text-slate-400">ID: {t.id.slice(0, 8)}</span>
-
-                          {t.assigned_to && (
-                            <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600 flex items-center gap-1">
-                              <UserCheck className="w-3 h-3 text-blue-600" />
-                              Assigned
-                            </span>
-                          )}
-                        </div>
-
-                        <div>
-                          <h3 className="text-base font-bold text-slate-900">{t.title}</h3>
-                          <p className="text-xs text-slate-600 mt-0.5">{t.description}</p>
-                        </div>
-
-                        {/* Order & Items Details Breakdown */}
-                        {items && items.length > 0 && (
-                          <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
-                            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                              Fulfillment Manifest:
-                            </span>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {items.map((it: any, idx: number) => (
-                                <div
-                                  key={idx}
-                                  className="text-xs bg-white p-2 rounded-lg border border-slate-200 flex items-center justify-between"
-                                >
-                                  <div>
-                                    <span className="font-semibold text-slate-900">
-                                      {it.product_name || it.title || "Catalog Item"}
-                                    </span>
-                                    <div className="text-[10px] text-slate-500">
-                                      SKU: {it.sku || "N/A"} {it.size ? `| Size: ${it.size}` : ""} {it.color ? `| Color: ${it.color}` : ""}
-                                    </div>
-                                  </div>
-                                  <span className="px-2 py-0.5 bg-blue-50 text-blue-700 font-bold rounded text-xs">
-                                    Qty: {it.quantity || 1}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Right: Actions */}
-                      <div className="flex flex-col sm:flex-row lg:flex-col items-end gap-2 shrink-0">
-                        {t.status === "CREATED" && (
-                          <button
-                            onClick={() => handleClaim(t.id)}
-                            disabled={actionLoading === t.id}
-                            className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center justify-center gap-2"
-                          >
-                            <Play className="w-3.5 h-3.5" />
-                            Claim Task
-                          </button>
-                        )}
-
-                        {isClaimed && (
-                          <button
-                            onClick={() => handleComplete(t.id)}
-                            disabled={actionLoading === t.id}
-                            className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center justify-center gap-2"
-                          >
-                            <CheckSquare className="w-3.5 h-3.5" />
-                            Complete Pick & Pack
-                          </button>
-                        )}
-
-                        <Link
-                          href={`/employee/tasks/${t.id}`}
-                          className="w-full sm:w-auto px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2 border border-slate-200"
-                        >
-                          Step-by-Step View
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Footer / Progress */}
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-3 h-3 text-slate-400" />
-                        Created {new Date(t.created_at).toLocaleString()}
-                      </span>
-                      {t.current_step && (
-                        <span className="font-medium text-slate-700">
-                          Active Step: <span className="font-mono text-blue-600">{t.current_step}</span>
-                        </span>
-                      )}
-                      <span className="font-semibold text-slate-600">
-                        Progress: {t.progress_percent || 0}%
-                      </span>
-                    </div>
+          <div className="space-y-3">
+            {filteredTasks.map((t) => (
+              <div
+                key={t.id}
+                className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition flex flex-col md:flex-row md:items-center justify-between gap-4"
+              >
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <span className="font-mono text-xs text-indigo-400 font-bold">#{t.id.slice(0, 8)}</span>
+                    <h3 className="text-sm font-semibold text-white truncate">{t.title}</h3>
+                    {getStatusBadge(t.status)}
+                    {getPriorityBadge(t.priority)}
                   </div>
-                );
-              })}
-            </div>
-          )}
+
+                  <div className="flex items-center gap-4 text-xs text-slate-400 flex-wrap">
+                    <span className="flex items-center gap-1">
+                      <Layers className="w-3.5 h-3.5 text-slate-500" />
+                      Type: <strong className="text-slate-300">{t.task_type}</strong>
+                    </span>
+                    {t.claimed_by && (
+                      <span className="flex items-center gap-1 text-indigo-300">
+                        <UserCheck className="w-3.5 h-3.5" />
+                        Claimed by: {t.claimed_by}
+                      </span>
+                    )}
+                    {t.payload?.order_id && (
+                      <span className="flex items-center gap-1 text-slate-300">
+                        <Package className="w-3.5 h-3.5 text-slate-500" />
+                        Order: #{t.payload.order_id}
+                      </span>
+                    )}
+                    <span className="text-slate-400">
+                      Created: {new Date(t.created_at).toLocaleTimeString()}
+                    </span>
+                  </div>
+
+                  {t.payload?.notes && (
+                    <p className="text-xs text-slate-400 bg-slate-950/60 p-2 rounded-lg border border-slate-800/60 mt-1">
+                      {t.payload.notes}
+                    </p>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 justify-end">
+                  {t.status === "PENDING" && (
+                    <button
+                      onClick={() => handleClaim(t.id)}
+                      disabled={actionLoading === t.id}
+                      className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1"
+                    >
+                      <Play className="w-3 h-3" />
+                      <span>{actionLoading === t.id ? "Claiming..." : "Claim Task"}</span>
+                    </button>
+                  )}
+
+                  {(t.status === "CLAIMED" || t.status === "IN_PROGRESS") && (
+                    <button
+                      onClick={() => handleComplete(t.id)}
+                      disabled={actionLoading === t.id}
+                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1"
+                    >
+                      <CheckSquare className="w-3 h-3" />
+                      <span>{actionLoading === t.id ? "Completing..." : "Complete Task"}</span>
+                    </button>
+                  )}
+
+                  {t.status === "COMPLETED" && (
+                    <span className="text-xs text-emerald-400 flex items-center gap-1 font-medium bg-emerald-950/40 px-3 py-1 rounded-lg border border-emerald-900/50">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Fulfilled
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {filteredTasks.length === 0 && !loading && (
+              <div className="text-center py-16 bg-slate-900/60 border border-slate-800 rounded-2xl p-8">
+                <ClipboardList className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                <h3 className="text-base font-semibold text-white">No tasks in this view</h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Queue is clear or no tasks match your current filter criteria.
+                </p>
+              </div>
+            )}
+          </div>
         </main>
       </div>
+
+      {/* Dispatch Task Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center">
+                  <Send className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Dispatch Operational Task</h3>
+                  <p className="text-[11px] text-slate-400">Add a high-priority directive into the warehouse dispatch queue</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateTask} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">
+                  Task Title / Action Item
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Express Pick & Pack: Order #ORD-8821"
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Task Category</label>
+                  <select
+                    value={taskType}
+                    onChange={(e) => setTaskType(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="PICK_AND_PACK">Pick & Pack</option>
+                    <option value="INVENTORY_COUNT">Inventory Count</option>
+                    <option value="RETURN_INSPECTION">Return Inspection</option>
+                    <option value="RESTOCK_VERIFICATION">Restock Verification</option>
+                    <option value="CARRIER_HANDOFF">Carrier Handoff</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Priority Level</label>
+                  <select
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="CRITICAL">Critical (Immediate)</option>
+                    <option value="HIGH">High (SLA &lt; 30m)</option>
+                    <option value="MEDIUM">Medium (Normal)</option>
+                    <option value="LOW">Low (Standard batch)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Assigned Role</label>
+                  <select
+                    value={assignedRole}
+                    onChange={(e) => setAssignedRole(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="WAREHOUSE_OPERATOR">Warehouse Operator</option>
+                    <option value="LOGISTICS_LEAD">Logistics Lead</option>
+                    <option value="QUALITY_INSPECTOR">Quality Inspector</option>
+                    <option value="SUPERVISOR">Operations Supervisor</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Related Order ID (Optional)</label>
+                  <input
+                    type="text"
+                    value={orderId}
+                    onChange={(e) => setOrderId(e.target.value)}
+                    placeholder="e.g. ORD-9932"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Operational Instructions & Notes</label>
+                <textarea
+                  rows={2}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Specific aisle, box sizing, packaging fragile tags..."
+                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-blue-600/30 transition disabled:opacity-50 flex items-center gap-2"
+                >
+                  {creating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  <span>{creating ? "Dispatching..." : "Dispatch Task"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

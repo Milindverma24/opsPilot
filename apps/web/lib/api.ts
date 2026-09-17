@@ -493,6 +493,8 @@ export const api = {
   aiEmployees: {
     list: () => apiFetch<any>("/ai/employees"),
     get: (id: string) => apiFetch<any>(`/ai/employees/${id}`),
+    create: (data: { name: string; role: string; description?: string; permissions?: string[]; llm_model?: string }) =>
+      apiFetch<any>("/ai/employees", { method: "POST", body: JSON.stringify(data) }),
     heartbeat: (id: string, data?: { current_task?: string; queue_size?: number }) =>
       apiFetch<any>(`/ai/employees/${id}/heartbeat`, {
         method: "POST",
@@ -611,6 +613,8 @@ export const api = {
       return apiFetch<any>(`/tasks${qs ? `?${qs}` : ""}`);
     },
     get: (id: string) => apiFetch<any>(`/tasks/${id}`),
+    create: (data: { title: string; description?: string; task_type?: string; priority?: string; assigned_to?: string; order_id?: string; customer_name?: string }) =>
+      apiFetch<any>("/tasks", { method: "POST", body: JSON.stringify(data) }),
     claim: (id: string, user_id?: string) =>
       apiFetch<any>(`/tasks/${id}/claim`, { method: "POST", body: JSON.stringify({ user_id }) }),
     updateProgress: (id: string, progress_percent: number, current_step?: string) =>

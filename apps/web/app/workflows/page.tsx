@@ -169,26 +169,26 @@ export default function WorkflowsPage() {
   const getStatusBadge = (st: string) => {
     switch (st) {
       case "COMPLETED":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200";
+        return "bg-emerald-950/60 text-emerald-400 border-emerald-800";
       case "RUNNING":
-        return "bg-blue-50 text-blue-700 border-blue-200 animate-pulse";
+        return "bg-indigo-950/60 text-indigo-400 border-indigo-800 animate-pulse";
       case "WAITING_FOR_APPROVAL":
-        return "bg-amber-50 text-amber-700 border-amber-200";
+        return "bg-amber-950/60 text-amber-400 border-amber-800";
       case "WAITING":
-        return "bg-indigo-50 text-indigo-700 border-indigo-200";
+        return "bg-indigo-950/60 text-indigo-400 border-indigo-800";
       case "RETRYING":
-        return "bg-purple-50 text-purple-700 border-purple-200";
+        return "bg-purple-950/60 text-purple-400 border-purple-800";
       case "FAILED":
-        return "bg-rose-50 text-rose-700 border-rose-200";
+        return "bg-rose-950/60 text-rose-400 border-rose-800";
       case "PAUSED":
-        return "bg-slate-100 text-slate-700 border-slate-200";
+        return "bg-slate-900 text-slate-400 border-slate-700";
       default:
-        return "bg-slate-50 text-slate-600 border-slate-200";
+        return "bg-slate-900 text-slate-400 border-slate-800";
     }
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
@@ -199,14 +199,14 @@ export default function WorkflowsPage() {
 
         <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
           {/* Tab Navigation */}
-          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveTab("definitions")}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                   activeTab === "definitions"
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                    : "bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800"
                 }`}
               >
                 <GitBranch className="w-4 h-4" />
@@ -217,8 +217,8 @@ export default function WorkflowsPage() {
                 onClick={() => setActiveTab("runs")}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                   activeTab === "runs"
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                    : "bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800"
                 }`}
               >
                 <Clock className="w-4 h-4" />
@@ -228,7 +228,7 @@ export default function WorkflowsPage() {
 
             <button
               onClick={() => (activeTab === "definitions" ? loadWorkflows() : loadRuns())}
-              className="p-2 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl shadow-sm"
+              className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 rounded-xl transition"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -239,7 +239,7 @@ export default function WorkflowsPage() {
             <div className="space-y-4">
               {loadingWfs ? (
                 <div className="py-16 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                  <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
                   <span>Loading workflow registry...</span>
                 </div>
               ) : (
@@ -247,18 +247,18 @@ export default function WorkflowsPage() {
                   {workflows.map((wf) => (
                     <div
                       key={wf.id}
-                      className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow space-y-4 flex flex-col justify-between"
+                      className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-lg hover:border-slate-700 transition space-y-4 flex flex-col justify-between"
                     >
                       <div className="space-y-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-bold text-sm text-slate-900">{wf.name}</h3>
-                              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-mono text-[10px]">
+                              <h3 className="font-bold text-sm text-white">{wf.name}</h3>
+                              <span className="px-2 py-0.5 rounded-md bg-slate-950 text-indigo-300 border border-slate-800 font-mono text-[10px]">
                                 {wf.version || "v1"}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-600 line-clamp-2">{wf.description}</p>
+                            <p className="text-xs text-slate-400 line-clamp-2">{wf.description}</p>
                           </div>
 
                           {/* Enable / Disable Switch */}
@@ -266,8 +266,8 @@ export default function WorkflowsPage() {
                             onClick={() => handleToggleEnabled(wf)}
                             className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors ${
                               wf.enabled
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                                : "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200"
+                                ? "bg-emerald-950/60 text-emerald-400 border-emerald-800 hover:bg-emerald-900/60"
+                                : "bg-slate-950 text-slate-500 border-slate-800 hover:bg-slate-900"
                             }`}
                           >
                             {wf.enabled ? "ACTIVE" : "DISABLED"}
@@ -275,27 +275,27 @@ export default function WorkflowsPage() {
                         </div>
 
                         {/* Metadata Pills */}
-                        <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-slate-500">
-                          <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
-                            Trigger: <strong className="text-blue-600">{wf.trigger_type}</strong>
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-slate-400">
+                          <span className="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
+                            Trigger: <strong className="text-indigo-400">{wf.trigger_type}</strong>
                           </span>
-                          <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                          <span className="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
                             Concurrency: {wf.max_concurrent_runs || 20} max
                           </span>
-                          <span className="bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                          <span className="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
                             Timeout: {wf.timeout_seconds || 1800}s
                           </span>
                         </div>
 
                         {/* Step count & types preview */}
                         {wf.steps && (
-                          <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                            <span className="text-[11px] font-semibold text-slate-700">Steps Architecture:</span>
+                          <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
+                            <span className="text-[11px] font-semibold text-slate-400">Steps Architecture:</span>
                             <div className="flex flex-wrap items-center gap-1.5">
                               {wf.steps.map((st: any) => (
                                 <span
                                   key={st.id || st.step_order}
-                                  className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80"
+                                  className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-950 text-slate-300 border border-slate-800"
                                 >
                                   {st.step_order}. {st.step_type}
                                 </span>
@@ -306,12 +306,12 @@ export default function WorkflowsPage() {
                       </div>
 
                       {/* Action Bar */}
-                      <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                      <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800/80">
                         <button
                           onClick={() => openTestModal(wf)}
-                          className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+                          className="px-3.5 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition-all"
                         >
-                          <Play className="w-3.5 h-3.5" />
+                          <Play className="w-3.5 h-3.5 fill-white" />
                           <span>Simulate / Test Run</span>
                         </button>
                       </div>
@@ -324,23 +324,23 @@ export default function WorkflowsPage() {
 
           {/* TAB 2: EXECUTION RUNS */}
           {activeTab === "runs" && (
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl shadow-xl overflow-hidden backdrop-blur-md">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
+                  <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
                     <tr>
-                      <th className="py-3 px-4">Run ID & Workflow</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4">Current Step</th>
-                      <th className="py-3 px-4">Started At</th>
-                      <th className="py-3 px-4 text-right">Actions</th>
+                      <th className="py-3.5 px-4 pl-5">Run ID & Workflow</th>
+                      <th className="py-3.5 px-4">Status</th>
+                      <th className="py-3.5 px-4">Current Step</th>
+                      <th className="py-3.5 px-4">Started At</th>
+                      <th className="py-3.5 px-4 text-right pr-5">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                  <tbody className="divide-y divide-slate-800 text-slate-300">
                     {loadingRuns ? (
                       <tr>
                         <td colSpan={5} className="py-12 text-center text-slate-400">
-                          <Loader2 className="w-4 h-4 animate-spin mx-auto text-blue-600" />
+                          <Loader2 className="w-4 h-4 animate-spin mx-auto text-indigo-400" />
                           <span className="mt-1 inline-block">Loading execution runs...</span>
                         </td>
                       </tr>
@@ -355,37 +355,37 @@ export default function WorkflowsPage() {
                         const isLoading = actionLoadingId === r.id;
 
                         return (
-                          <tr key={r.id} className="hover:bg-slate-50/70 transition-colors">
-                            <td className="py-3 px-4">
-                              <div className="font-bold text-slate-900">
+                          <tr key={r.id} className="hover:bg-slate-800/40 transition-colors">
+                            <td className="py-3.5 px-4 pl-5">
+                              <div className="font-bold text-white">
                                 {r.workflow?.name || r.workflow?.workflow_type || "Autonomous Run"}
                               </div>
-                              <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                              <div className="text-[10px] text-slate-500 font-mono mt-0.5">
                                 #{r.id.slice(0, 8)} • Event: {r.trigger_event_type || "EVENT"}
                               </div>
                             </td>
 
-                            <td className="py-3 px-4">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadge(r.status)}`}>
+                            <td className="py-3.5 px-4">
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadge(r.status)}`}>
                                 {r.status}
                               </span>
                             </td>
 
-                            <td className="py-3 px-4 font-mono text-slate-700">
+                            <td className="py-3.5 px-4 font-mono text-slate-300">
                               Step #{r.current_step_order || 1}
                             </td>
 
-                            <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
+                            <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
                               {formatDate(r.started_at || r.created_at)}
                             </td>
 
-                            <td className="py-3 px-4 text-right">
+                            <td className="py-3.5 px-4 text-right pr-5">
                               <div className="flex items-center justify-end gap-1.5">
                                 {r.status === "RUNNING" && (
                                   <button
                                     onClick={() => handlePauseRun(r.id)}
                                     disabled={isLoading}
-                                    className="p-1 text-slate-500 hover:text-amber-600 hover:bg-slate-100 rounded"
+                                    className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition"
                                     title="Pause Run"
                                   >
                                     <Pause className="w-3.5 h-3.5" />
@@ -396,7 +396,7 @@ export default function WorkflowsPage() {
                                   <button
                                     onClick={() => handleResumeRun(r.id)}
                                     disabled={isLoading}
-                                    className="p-1 text-slate-500 hover:text-emerald-600 hover:bg-slate-100 rounded"
+                                    className="p-1.5 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded-lg transition"
                                     title="Resume Run"
                                   >
                                     <Play className="w-3.5 h-3.5" />
@@ -407,7 +407,7 @@ export default function WorkflowsPage() {
                                   <button
                                     onClick={() => handleRetryRun(r.id)}
                                     disabled={isLoading}
-                                    className="p-1 text-slate-500 hover:text-purple-600 hover:bg-slate-100 rounded"
+                                    className="p-1.5 text-slate-400 hover:text-purple-400 hover:bg-slate-800 rounded-lg transition"
                                     title="Retry Run"
                                   >
                                     <RotateCcw className="w-3.5 h-3.5" />
@@ -416,9 +416,9 @@ export default function WorkflowsPage() {
 
                                 <button
                                   onClick={() => handleSelectRun(r.id)}
-                                  className="px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 border border-slate-200 rounded-lg text-slate-700 font-semibold text-[11px] inline-flex items-center gap-1 transition-colors"
+                                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-semibold text-[11px] inline-flex items-center gap-1 transition"
                                 >
-                                  <Eye className="w-3 h-3" />
+                                  <Eye className="w-3 h-3 text-indigo-400" />
                                   <span>Inspect</span>
                                 </button>
                               </div>
@@ -437,27 +437,30 @@ export default function WorkflowsPage() {
 
       {/* Visual Workflow Run Drawer */}
       {selectedRun && (
-        <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl border-l border-slate-200 z-50 flex flex-col p-6 space-y-4 overflow-y-auto">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-slate-900 shadow-2xl border-l border-slate-800 z-50 flex flex-col p-6 space-y-4 overflow-y-auto animate-in slide-in-from-right">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-sm text-slate-900">
+                <span className="font-bold text-sm text-white">
                   {selectedRun.workflow?.name || "Workflow Execution Run"}
                 </span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadge(selectedRun.status)}`}>
                   {selectedRun.status}
                 </span>
               </div>
-              <div className="text-[11px] text-slate-500 font-mono mt-0.5">Run ID: {selectedRun.id}</div>
+              <div className="text-[11px] text-slate-400 font-mono mt-0.5">Run ID: {selectedRun.id}</div>
             </div>
-            <button onClick={() => setSelectedRun(null)} className="text-slate-400 hover:text-slate-600">
+            <button
+              onClick={() => setSelectedRun(null)}
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+            >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Visual Step Timeline */}
           <div className="space-y-2">
-            <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">Step Timeline</h4>
+            <h4 className="font-bold text-slate-400 text-xs uppercase tracking-wider">Step Timeline</h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {selectedRun.step_runs?.map((st: any) => {
                 const isSelected = selectedStep?.id === st.id;
@@ -465,23 +468,23 @@ export default function WorkflowsPage() {
                   <button
                     key={st.id}
                     onClick={() => setSelectedStep(st)}
-                    className={`p-2 rounded-xl text-left border transition-all ${
+                    className={`p-2.5 rounded-xl text-left border transition-all ${
                       isSelected
-                        ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                        : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                        ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30"
+                        : "bg-slate-950 hover:bg-slate-800 text-slate-300 border-slate-800"
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-[11px] truncate">{st.workflow_step?.step_type || "STEP"}</span>
                       {st.status === "SUCCEEDED" ? (
-                        <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-white" : "text-emerald-500"}`} />
+                        <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-white" : "text-emerald-400"}`} />
                       ) : st.status === "FAILED" ? (
-                        <XCircle className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-white" : "text-rose-500"}`} />
+                        <XCircle className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-white" : "text-rose-400"}`} />
                       ) : (
-                        <Clock className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-white" : "text-amber-500"}`} />
+                        <Clock className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-white" : "text-amber-400"}`} />
                       )}
                     </div>
-                    <div className={`text-[9px] mt-0.5 font-mono ${isSelected ? "text-blue-100" : "text-slate-400"}`}>
+                    <div className={`text-[9px] mt-0.5 font-mono ${isSelected ? "text-indigo-200" : "text-slate-500"}`}>
                       #{st.attempt_number || 1} • {st.status}
                     </div>
                   </button>
@@ -492,33 +495,33 @@ export default function WorkflowsPage() {
 
           {/* Step Detail Inspector */}
           {selectedStep && (
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 flex-1 overflow-y-auto">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                <span className="font-bold text-xs text-slate-900">
+            <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-3 flex-1 overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span className="font-bold text-xs text-white">
                   Step Detail: {selectedStep.workflow_step?.name || selectedStep.workflow_step?.step_type}
                 </span>
-                <span className="text-[10px] font-mono text-slate-500">
+                <span className="text-[10px] font-mono text-slate-400">
                   Status: {selectedStep.status} • Duration: {selectedStep.duration_ms || 0}ms
                 </span>
               </div>
 
               {selectedStep.error_message && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs">
+                <div className="p-3 bg-rose-950/60 border border-rose-800 rounded-xl text-rose-300 text-xs">
                   <strong>Error ({selectedStep.error_code}):</strong> {selectedStep.error_message}
                 </div>
               )}
 
               <div className="space-y-1 text-xs">
-                <span className="font-semibold text-slate-600">Output Data:</span>
-                <pre className="p-3 bg-slate-900 text-emerald-400 rounded-xl font-mono text-[11px] overflow-x-auto">
+                <span className="font-semibold text-slate-400">Output Data:</span>
+                <pre className="p-3 bg-slate-900 text-emerald-400 rounded-xl font-mono text-[11px] border border-slate-800 overflow-x-auto">
                   {JSON.stringify(selectedStep.output_data || {}, null, 2)}
                 </pre>
               </div>
 
               {selectedStep.input_data && (
                 <div className="space-y-1 text-xs pt-2">
-                  <span className="font-semibold text-slate-600">Input Context:</span>
-                  <pre className="p-3 bg-white border border-slate-200 text-slate-800 rounded-xl font-mono text-[11px] overflow-x-auto">
+                  <span className="font-semibold text-slate-400">Input Context:</span>
+                  <pre className="p-3 bg-slate-900 border border-slate-800 text-indigo-300 rounded-xl font-mono text-[11px] overflow-x-auto">
                     {JSON.stringify(selectedStep.input_data || {}, null, 2)}
                   </pre>
                 </div>
@@ -530,32 +533,32 @@ export default function WorkflowsPage() {
 
       {/* Test / Simulate Modal */}
       {testModalWf && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-lg w-full p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 max-w-lg w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <Play className="w-5 h-5 text-blue-600" />
-                <h3 className="font-bold text-sm text-slate-900">
+                <Play className="w-5 h-5 text-indigo-400" />
+                <h3 className="font-bold text-sm text-white">
                   Simulate Workflow: {testModalWf.name}
                 </h3>
               </div>
-              <button onClick={() => setTestModalWf(null)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setTestModalWf(null)} className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-3.5 text-xs">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Execution Mode</label>
+                <label className="font-bold text-slate-300">Execution Mode</label>
                 <div className="grid grid-cols-3 gap-2">
                   {["PLAN_ONLY", "DRY_RUN", "LIVE_MOCK"].map((mode) => (
                     <button
                       key={mode}
                       onClick={() => setTestMode(mode)}
-                      className={`py-1.5 rounded-lg border text-center font-bold text-[11px] transition-all ${
+                      className={`py-1.5 rounded-xl border text-center font-bold text-[11px] transition-all ${
                         testMode === mode
-                          ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                          ? "bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30"
+                          : "bg-slate-950 text-slate-400 border-slate-800 hover:bg-slate-800"
                       }`}
                     >
                       {mode}
@@ -565,36 +568,36 @@ export default function WorkflowsPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Test Input Payload (JSON)</label>
+                <label className="font-bold text-slate-300">Test Input Payload (JSON)</label>
                 <textarea
                   value={testPayload}
                   onChange={(e) => setTestPayload(e.target.value)}
                   rows={5}
-                  className="w-full p-3 font-mono text-[11px] border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                  className="w-full p-3 font-mono text-[11px] text-indigo-300 bg-slate-950 border border-slate-800 rounded-xl focus:border-indigo-500 outline-none resize-none"
                 />
               </div>
 
               {testResult && (
-                <div className="space-y-1 pt-2 border-t border-slate-100">
-                  <span className="font-bold text-emerald-700">Execution Result:</span>
-                  <pre className="p-3 bg-slate-900 text-emerald-400 rounded-xl font-mono text-[11px] max-h-40 overflow-y-auto">
+                <div className="space-y-1 pt-2 border-t border-slate-800">
+                  <span className="font-bold text-emerald-400">Execution Result:</span>
+                  <pre className="p-3 bg-slate-950 text-emerald-400 border border-slate-800 rounded-xl font-mono text-[11px] max-h-40 overflow-y-auto">
                     {JSON.stringify(testResult, null, 2)}
                   </pre>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
               <button
                 onClick={() => setTestModalWf(null)}
-                className="px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="px-3.5 py-1.5 text-xs text-slate-400 hover:text-white rounded-xl"
               >
                 Close
               </button>
               <button
                 onClick={handleRunTest}
                 disabled={testRunning}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm flex items-center gap-1.5"
+                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-1.5"
               >
                 {testRunning && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Execute Test</span>

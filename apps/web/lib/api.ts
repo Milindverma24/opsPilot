@@ -460,6 +460,11 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ reason }),
       }),
+    promote: (id: string, reason?: string) =>
+      apiFetch<any>(`/escalations/${id}/escalate`, {
+        method: "POST",
+        body: JSON.stringify({ reason }),
+      }),
     checkSla: () => apiFetch<any>("/escalations/check-sla", { method: "POST" }),
   },
   customer: {

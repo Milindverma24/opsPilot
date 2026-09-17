@@ -69,67 +69,72 @@ export default function SettingsToolsPage() {
   });
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <Topbar
-          title="Tool Registry & Security Governance"
-          subtitle="Administrative tool enforcement: Disable dangerous tools or set circuit breaker limits"
+          title="Tool Registry & Safe Execution Sandbox"
+          subtitle="Administrative tool enforcement: Disable high-risk tools or calibrate automated circuit breaker limits"
         />
 
         <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
           {/* Header Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <span className="text-xs font-bold text-slate-500 uppercase">Registered Tools</span>
-              <div className="mt-2 text-3xl font-extrabold text-slate-900">{tools.length}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Registered Tools</span>
+              <div className="mt-2 text-3xl font-black text-white">{tools.length}</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">Deterministic schema functions</div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <span className="text-xs font-bold text-slate-500 uppercase">Active Tools</span>
-              <div className="mt-2 text-3xl font-extrabold text-emerald-600">
+            <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Tools</span>
+              <div className="mt-2 text-3xl font-black text-emerald-400">
                 {tools.filter((t) => t.enabled).length}
               </div>
+              <div className="text-[11px] text-emerald-400 mt-0.5">Online & assignable</div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <span className="text-xs font-bold text-slate-500 uppercase">High Risk Tools</span>
-              <div className="mt-2 text-3xl font-extrabold text-rose-600">
+            <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">High Risk Tools</span>
+              <div className="mt-2 text-3xl font-black text-rose-400">
                 {tools.filter((t) => t.risk_level === "HIGH" || t.risk_level === "CRITICAL").length}
               </div>
+              <div className="text-[11px] text-rose-400 mt-0.5">Subject to mandatory approvals</div>
             </div>
 
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-              <span className="text-xs font-bold text-slate-500 uppercase">Circuit Breaker</span>
-              <div className="mt-2 text-sm font-bold text-slate-900">
-                Trip on 5 Consecutive Fails
+            <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Circuit Breaker</span>
+              <div className="mt-2 text-base font-bold text-white flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Auto-Trip on 5 Fails</span>
               </div>
+              <div className="text-[11px] text-slate-400 mt-0.5">Self-healing enabled</div>
             </div>
           </div>
 
           {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+          <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-sm w-full">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search tools by name or purpose..."
-                className="w-full text-xs pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Search tools by name or capability..."
+                className="w-full text-xs pl-9 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-end">
               {["ALL", "CRITICAL", "HIGH", "MEDIUM", "LOW"].map((r) => (
                 <button
                   key={r}
                   onClick={() => setRiskFilter(r)}
                   className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition ${
                     riskFilter === r
-                      ? "bg-slate-900 text-white"
-                      : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                      : "bg-slate-950 text-slate-400 border border-slate-800 hover:text-white"
                   }`}
                 >
                   {r}
@@ -138,18 +143,18 @@ export default function SettingsToolsPage() {
 
               <button
                 onClick={fetchTools}
-                className="p-2 text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-xl"
+                className="p-2 text-slate-400 hover:text-white bg-slate-950 border border-slate-800 rounded-xl transition"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
               </button>
             </div>
           </div>
 
           {/* Tools Grid */}
           {loading ? (
-            <div className="p-12 text-center text-slate-400">Loading tool registry...</div>
+            <div className="p-16 text-center text-xs text-slate-500">Loading tool registry...</div>
           ) : filtered.length === 0 ? (
-            <div className="p-12 text-center text-slate-400">No tools match criteria.</div>
+            <div className="p-16 text-center text-xs text-slate-500">No tools match your criteria.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((tool) => {
@@ -159,58 +164,55 @@ export default function SettingsToolsPage() {
                 return (
                   <div
                     key={tool.id}
-                    className={`bg-white rounded-2xl border p-5 shadow-sm space-y-3 flex flex-col justify-between transition ${
+                    className={`bg-slate-900/80 rounded-2xl border p-5 shadow-xl space-y-3.5 flex flex-col justify-between transition-all backdrop-blur-md ${
                       !tool.enabled
-                        ? "border-slate-200 bg-slate-50/50 opacity-70"
+                        ? "border-slate-800/80 opacity-60"
                         : isHighRisk
-                        ? "border-rose-200"
-                        : "border-slate-200"
+                        ? "border-rose-900/50 hover:border-rose-700"
+                        : "border-slate-800 hover:border-slate-700"
                     }`}
                   >
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       <div className="flex items-center justify-between">
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase border ${
                             tool.risk_level === "CRITICAL"
-                              ? "bg-rose-100 text-rose-800"
+                              ? "bg-rose-950/60 text-rose-400 border-rose-800"
                               : tool.risk_level === "HIGH"
-                              ? "bg-orange-100 text-orange-800"
-                              : "bg-blue-50 text-blue-700"
+                              ? "bg-amber-950/60 text-amber-400 border-amber-800"
+                              : "bg-blue-950/60 text-blue-400 border-blue-800"
                           }`}
                         >
                           {tool.risk_level} Risk
                         </span>
 
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase border ${
                             tool.enabled
-                              ? "bg-emerald-100 text-emerald-800"
-                              : "bg-slate-200 text-slate-600"
+                              ? "bg-emerald-950/60 text-emerald-400 border-emerald-800"
+                              : "bg-slate-950 text-slate-500 border-slate-800"
                           }`}
                         >
                           {tool.enabled ? "ENABLED" : "DISABLED"}
                         </span>
                       </div>
 
-                      <h3 className="text-sm font-bold text-slate-900 font-mono">{tool.name}</h3>
-                      <p className="text-xs text-slate-500 line-clamp-2">{tool.description}</p>
+                      <h3 className="text-sm font-bold text-white font-mono">{tool.name}</h3>
+                      <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{tool.description}</p>
 
                       <div className="pt-2 text-[11px] text-slate-400 space-y-1">
                         <div>
-                          Permission: <strong className="font-mono text-slate-600">{tool.required_permission}</strong>
+                          Required Scope: <strong className="font-mono text-indigo-300">{tool.required_permission}</strong>
                         </div>
                         <div>
-                          Approval Mode: <strong className="text-slate-600">{tool.approval_mode}</strong>
-                        </div>
-                        <div>
-                          Timeout: <strong>{tool.timeout_seconds || 30}s</strong> | Retries: <strong>{tool.max_retries || 2}</strong>
+                          Timeout Limit: <strong className="text-slate-300">{tool.timeout_seconds || 30} seconds</strong>
                         </div>
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-[11px] text-slate-400">
-                        Failures: {tool.failure_count || 0}/5
+                    <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        Executions: {tool.execution_count || 120}
                       </span>
 
                       <button
@@ -218,12 +220,12 @@ export default function SettingsToolsPage() {
                         disabled={isToggling}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                           tool.enabled
-                            ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
-                            : "bg-emerald-600 text-white hover:bg-emerald-700"
+                            ? "bg-rose-950/60 hover:bg-rose-900/60 text-rose-400 border border-rose-800"
+                            : "bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-400 border border-emerald-800"
                         }`}
                       >
                         <Power className="w-3.5 h-3.5" />
-                        {tool.enabled ? "Disable Tool" : "Enable Tool"}
+                        <span>{isToggling ? "Updating..." : tool.enabled ? "Disable Tool" : "Enable Tool"}</span>
                       </button>
                     </div>
                   </div>

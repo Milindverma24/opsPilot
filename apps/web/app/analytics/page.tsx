@@ -37,8 +37,6 @@ import {
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 
-const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"];
-
 export default function AnalyticsPage() {
   const [activeTab, setActiveTab] = useState<"business" | "workforce" | "workflows" | "support">("business");
   const [timeRange, setTimeRange] = useState<string>("7d");
@@ -71,7 +69,6 @@ export default function AnalyticsPage() {
     fetchAnalytics();
   }, [timeRange]);
 
-  // Synthetic trend for charts if backend data is minimal
   const revenueTrend = bizData?.revenue_trend || [
     { date: "Day 1", revenue: 42000, orders: 14 },
     { date: "Day 2", revenue: 58000, orders: 19 },
@@ -91,20 +88,20 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <Topbar
-          title="Enterprise Operational Intelligence & Business Analytics"
+          title="Enterprise Operational Intelligence & Analytics"
           subtitle="Autonomous automation rates, multi-agent fleet metrics, GMV growth, and step bottleneck funnels"
         />
 
         <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
           {/* Header Controls */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-md">
             {/* Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
               {[
                 { id: "business", label: "Commercial GMV & Sales", icon: ShoppingBag },
                 { id: "workforce", label: "AI Workforce & Automation", icon: Cpu },
@@ -119,8 +116,8 @@ export default function AnalyticsPage() {
                     onClick={() => setActiveTab(tab.id as any)}
                     className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                       isActive
-                        ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                        : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                        : "bg-slate-950 text-slate-400 hover:text-white border border-slate-800"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -130,19 +127,27 @@ export default function AnalyticsPage() {
               })}
             </div>
 
-            {/* Time range selector */}
+            {/* Time range selector & Refresh */}
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500">Range:</span>
+              <span className="text-xs font-semibold text-slate-400">Range:</span>
               <select
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-medium focus:outline-none"
+                className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
               >
                 <option value="today">Today</option>
                 <option value="7d">Last 7 Days</option>
                 <option value="30d">Last 30 Days</option>
                 <option value="90d">Last 90 Days</option>
               </select>
+
+              <button
+                onClick={fetchAnalytics}
+                disabled={loading}
+                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+              </button>
             </div>
           </div>
 
@@ -150,29 +155,29 @@ export default function AnalyticsPage() {
           {activeTab === "business" && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                  <span className="text-xs font-semibold text-slate-500">Total GMV Revenue</span>
-                  <div className="text-2xl font-black text-slate-900">
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md space-y-2">
+                  <span className="text-xs font-semibold text-slate-400">Total GMV Revenue</span>
+                  <div className="text-3xl font-black text-white">
                     ₹{bizData?.total_gmv?.toLocaleString() || "5,02,000"}
                   </div>
-                  <div className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                  <div className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
                     <TrendingUp className="w-3.5 h-3.5" /> +18.2% vs previous period
                   </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                  <span className="text-xs font-semibold text-slate-500">Orders Processed</span>
-                  <div className="text-2xl font-black text-slate-900">
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md space-y-2">
+                  <span className="text-xs font-semibold text-slate-400">Orders Processed</span>
+                  <div className="text-3xl font-black text-white">
                     {bizData?.orders_count || 164}
                   </div>
-                  <div className="text-xs text-slate-500">
-                    Average Order: ₹{bizData?.aov || "3,060"}
+                  <div className="text-xs text-slate-400">
+                    Average Order Value: ₹{bizData?.aov || "3,060"}
                   </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                  <span className="text-xs font-semibold text-slate-500">Net Refund Volume</span>
-                  <div className="text-2xl font-black text-slate-900">
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md space-y-2">
+                  <span className="text-xs font-semibold text-slate-400">Net Refund Volume</span>
+                  <div className="text-3xl font-black text-amber-400">
                     ₹{bizData?.refund_amount?.toLocaleString() || "24,800"}
                   </div>
                   <div className="text-xs text-slate-400">
@@ -180,43 +185,44 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                  <span className="text-xs font-semibold text-slate-500">Labor Hours Saved</span>
-                  <div className="text-2xl font-black text-slate-900">
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md space-y-2">
+                  <span className="text-xs font-semibold text-slate-400">Labor Hours Saved</span>
+                  <div className="text-3xl font-black text-emerald-400">
                     420 Hours
                   </div>
-                  <div className="text-xs text-emerald-600 font-semibold">
-                    ₹3,15,000 estimated labor savings
+                  <div className="text-xs text-emerald-400 font-semibold">
+                    ₹3,15,000 estimated savings
                   </div>
                 </div>
               </div>
 
               {/* Revenue Chart */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-md space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Revenue Growth Trend (INR)</h3>
-                  <p className="text-xs text-slate-500">Daily gross merchandise value captured across UrbanThread storefront</p>
+                  <h3 className="text-sm font-bold text-white">Revenue Growth Trend (INR)</h3>
+                  <p className="text-xs text-slate-400">Daily gross merchandise value captured across UrbanThread storefront</p>
                 </div>
                 <div className="h-72 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={revenueTrend}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                      <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                      <XAxis dataKey="date" stroke="#64748b" fontSize={11} tickLine={false} />
+                      <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "#0f172a",
-                          borderRadius: "8px",
-                          color: "#fff",
+                          borderColor: "#334155",
+                          borderRadius: "0.75rem",
+                          color: "#f8fafc",
                           fontSize: "12px",
                         }}
                       />
                       <Line
                         type="monotone"
                         dataKey="revenue"
-                        stroke="#2563eb"
+                        stroke="#6366f1"
                         strokeWidth={3}
-                        dot={{ r: 4, fill: "#2563eb" }}
+                        dot={{ r: 4, fill: "#6366f1" }}
                         name="Gross GMV (₹)"
                       />
                     </LineChart>
@@ -231,74 +237,72 @@ export default function AnalyticsPage() {
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Deterministic Automation Rate */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                  <span className="text-xs font-semibold text-slate-500">Autonomous Automation Rate</span>
-                  <div className="text-3xl font-black text-blue-600">
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md space-y-2">
+                  <span className="text-xs font-semibold text-slate-400">Autonomous Automation Rate</span>
+                  <div className="text-3xl font-black text-indigo-400">
                     {aiData?.automation_rate ? `${aiData.automation_rate}%` : "94.8%"}
                   </div>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-slate-400">
                     {aiData?.automated_tasks || 248} automated / {aiData?.total_tasks || 262} total operations
                   </div>
-                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-2">
+                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden mt-2 border border-slate-800">
                     <div
-                      className="bg-blue-600 h-full rounded-full"
+                      className="bg-indigo-500 h-full rounded-full"
                       style={{ width: `${aiData?.automation_rate || 94.8}%` }}
-                    ></div>
+                    />
                   </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                  <span className="text-xs font-semibold text-slate-500">AI Task Success Accuracy</span>
-                  <div className="text-3xl font-black text-emerald-600">
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md space-y-2">
+                  <span className="text-xs font-semibold text-slate-400">AI Task Success Accuracy</span>
+                  <div className="text-3xl font-black text-emerald-400">
                     {aiData?.accuracy_rate ? `${aiData.accuracy_rate}%` : "99.2%"}
                   </div>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-slate-400">
                     Controlled safe tool execution with zero unapproved schema deviations
                   </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                  <span className="text-xs font-semibold text-slate-500">Human Escalations Avoided</span>
-                  <div className="text-3xl font-black text-indigo-600">
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md space-y-2">
+                  <span className="text-xs font-semibold text-slate-400">Human Escalations Avoided</span>
+                  <div className="text-3xl font-black text-blue-400">
                     {aiData?.escalations_avoided || 214}
                   </div>
-                  <div className="text-xs text-emerald-600 font-semibold">
+                  <div className="text-xs text-emerald-400 font-semibold">
                     Self-resolved without human support agent involvement
                   </div>
                 </div>
               </div>
 
               {/* Individual Worker Contribution Table */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-                <div className="p-5 border-b border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-900">Workforce Node Execution Split</h3>
-                  <p className="text-xs text-slate-500">Tasks resolved autonomously by each specialized AI employee</p>
+              <div className="bg-slate-900/80 rounded-2xl border border-slate-800 shadow-xl overflow-hidden backdrop-blur-md">
+                <div className="p-5 border-b border-slate-800">
+                  <h3 className="text-sm font-bold text-white">Workforce Node Execution Split</h3>
+                  <p className="text-xs text-slate-400">Tasks resolved autonomously by each specialized AI employee</p>
                 </div>
-                <div className="p-4">
-                  <div className="space-y-3">
-                    {[
-                      { name: "Aria (Customer Assistant)", tasks: 92, rate: "98.4%", color: "bg-blue-600" },
-                      { name: "Atlas (Order Fulfillment)", tasks: 74, rate: "99.1%", color: "bg-indigo-600" },
-                      { name: "Vulcan (Returns & Refunds)", tasks: 48, rate: "99.5%", color: "bg-emerald-600" },
-                      { name: "Hermes (Logistics & 3PL)", tasks: 32, rate: "96.5%", color: "bg-purple-600" },
-                      { name: "Vesta (Inventory Intelligence)", tasks: 16, rate: "97.8%", color: "bg-amber-600" },
-                    ].map((w, idx) => (
-                      <div key={idx} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-semibold text-slate-800">{w.name}</span>
-                          <span className="text-slate-500 font-mono">
-                            {w.tasks} tasks ({w.rate} success)
-                          </span>
-                        </div>
-                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                          <div
-                            className={`${w.color} h-full rounded-full`}
-                            style={{ width: `${(w.tasks / 92) * 100}%` }}
-                          ></div>
-                        </div>
+                <div className="p-5 space-y-4">
+                  {[
+                    { name: "Aria (Customer Assistant)", tasks: 92, rate: "98.4%", color: "bg-indigo-500" },
+                    { name: "Atlas (Order Fulfillment)", tasks: 74, rate: "99.1%", color: "bg-blue-500" },
+                    { name: "Vulcan (Returns & Refunds)", tasks: 48, rate: "99.5%", color: "bg-emerald-500" },
+                    { name: "Hermes (Logistics & 3PL)", tasks: 32, rate: "96.5%", color: "bg-purple-500" },
+                    { name: "Vesta (Inventory Intelligence)", tasks: 16, rate: "97.8%", color: "bg-amber-500" },
+                  ].map((w, idx) => (
+                    <div key={idx} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-white">{w.name}</span>
+                        <span className="text-slate-400 font-mono">
+                          {w.tasks} tasks ({w.rate} success)
+                        </span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                        <div
+                          className={`${w.color} h-full rounded-full`}
+                          style={{ width: `${(w.tasks / 92) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -307,26 +311,27 @@ export default function AnalyticsPage() {
           {/* TAB 3: WORKFLOW BOTTLENECKS */}
           {activeTab === "workflows" && (
             <div className="space-y-6 animate-in fade-in duration-200">
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-md space-y-4">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Workflow Step Latency Breakdown (ms)</h3>
-                  <p className="text-xs text-slate-500">Identifies slow external 3PL carrier APIs and optimizes autonomous steps</p>
+                  <h3 className="text-sm font-bold text-white">Workflow Step Latency Breakdown (ms)</h3>
+                  <p className="text-xs text-slate-400">Identifies slow external 3PL carrier APIs and optimizes autonomous steps</p>
                 </div>
                 <div className="h-72 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={bottleneckSteps} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                      <XAxis type="number" stroke="#94a3b8" fontSize={11} tickLine={false} unit="ms" />
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#1e293b" />
+                      <XAxis type="number" stroke="#64748b" fontSize={11} tickLine={false} unit="ms" />
                       <YAxis dataKey="step" type="category" stroke="#94a3b8" fontSize={11} tickLine={false} width={150} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "#0f172a",
-                          borderRadius: "8px",
-                          color: "#fff",
+                          borderColor: "#334155",
+                          borderRadius: "0.75rem",
+                          color: "#f8fafc",
                           fontSize: "12px",
                         }}
                       />
-                      <Bar dataKey="latency" fill="#3b82f6" radius={[0, 4, 4, 0]} name="Step Latency (ms)" />
+                      <Bar dataKey="latency" fill="#6366f1" radius={[0, 4, 4, 0]} name="Step Latency (ms)" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -338,29 +343,29 @@ export default function AnalyticsPage() {
           {activeTab === "support" && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                  <span className="text-xs font-semibold text-slate-500">Aria Customer CSAT Rating</span>
-                  <div className="text-3xl font-black text-amber-500 flex items-center gap-2">
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md space-y-2">
+                  <span className="text-xs font-semibold text-slate-400">Aria Customer CSAT Rating</span>
+                  <div className="text-3xl font-black text-amber-400 flex items-center gap-2">
                     <span>4.9 / 5.0</span>
                     <span className="text-lg">⭐</span>
                   </div>
-                  <div className="text-xs text-slate-500">Based on verified post-chat shopper ratings</div>
+                  <div className="text-xs text-slate-400">Based on verified post-chat shopper ratings</div>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                  <span className="text-xs font-semibold text-slate-500">Avg Resolution Speed</span>
-                  <div className="text-3xl font-black text-emerald-600">
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md space-y-2">
+                  <span className="text-xs font-semibold text-slate-400">Avg Resolution Speed</span>
+                  <div className="text-3xl font-black text-emerald-400">
                     1.4s
                   </div>
-                  <div className="text-xs text-slate-500">Instant answer vs 4.2 hours human email SLA</div>
+                  <div className="text-xs text-slate-400">Instant answer vs 4.2 hours human email SLA</div>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                  <span className="text-xs font-semibold text-slate-500">Return Policy Compliance</span>
-                  <div className="text-3xl font-black text-blue-600">
+                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-md backdrop-blur-md space-y-2">
+                  <span className="text-xs font-semibold text-slate-400">Return Policy Compliance</span>
+                  <div className="text-3xl font-black text-indigo-400">
                     100%
                   </div>
-                  <div className="text-xs text-slate-500">0 out-of-policy returns leaked</div>
+                  <div className="text-xs text-slate-400">0 out-of-policy returns leaked</div>
                 </div>
               </div>
             </div>

@@ -436,6 +436,27 @@ export default function CustomerChatStudioPage() {
                       {msg.content}
                     </div>
 
+                    {/* Transparent Chain-of-Thought Reasoning Badge */}
+                    {msg.metadata?.reasoning_steps && Array.isArray(msg.metadata.reasoning_steps) && msg.metadata.reasoning_steps.length > 0 && (
+                      <details className="group bg-slate-900/60 border border-slate-800/80 rounded-xl p-2.5 text-xs text-slate-300">
+                        <summary className="cursor-pointer font-semibold text-[11px] text-indigo-400 flex items-center justify-between select-none">
+                          <span className="flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                            <span>Aria's Cognitive Reasoning Trace ({msg.metadata.reasoning_steps.length} steps)</span>
+                          </span>
+                          <span className="text-[10px] text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div className="mt-2.5 pt-2 border-t border-slate-800/60 space-y-1.5">
+                          {msg.metadata.reasoning_steps.map((step: string, sIdx: number) => (
+                            <div key={sIdx} className="text-[11px] font-mono text-slate-400 flex items-start gap-2 bg-slate-950/50 p-1.5 rounded-lg">
+                              <span className="text-emerald-400">✔</span>
+                              <span>{step}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </details>
+                    )}
+
                     {/* Grounded RAG Citation Cards */}
                     {msg.metadata?.citations && Array.isArray(msg.metadata.citations) && msg.metadata.citations.length > 0 && (
                       <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-xs space-y-2 shadow-sm">

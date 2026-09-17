@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from apps.api.app.core.database import get_db
 from apps.api.app.core.security import get_current_user
 from apps.api.app.models.tenant import User
+from apps.api.app.models.ecommerce import Return
 from apps.api.app.services.return_service import ReturnService
 from apps.api.app.services.authorization_service import require_permission
 
@@ -113,4 +114,40 @@ def reject_return(
         actor_id=current_user.id
     )
     return {"status": "success", "return_number": ret.return_number, "new_status": ret.status}
+
+
+from fastapi.responses import HTMLResponse
+
+
+@router.get("/{return_id}/label", response_class=HTMLResponse)
+def get_return_label(
+    return_id: str,
+    db: Session = Depends(get_db)
+):
+    """Returns a printable 4x6 inch reverse logistics return label with barcode."""
+    ret = db.query(Return).filter(Return.id == return_id).first()
+    if not ret:
+        raise HTTPException(status_code=404, detail="Return not found")
+
+    order = ret.order
+    customer = getattr(ret, "customer", None) or (getattr(order, "customer", None) if order else None)
+    customer_name = getattr(customer, "name", None) if customer else "Rahul Sharma"
+    order_num = order.order_number if order else "UT-DEMO"
+    shipping_addr = getattr(order, "shipping_address", None) or "A-402, Sea Crest Towers, Bandra West"
+
+    from apps.api.app.services.label_service import LabelService
+    label_html = LabelService.render_shipping_label_html(
+        tracking_number=ret.return_number,
+        carrier="BlueDart Reverse Express",
+        order_number=order_num,
+        recipient_name=customer_name,
+        recipient_address=shipping_addr or "Flat 12, Palm Grove, Bandra West",
+        city="Mumbai",
+        state="Maharashtra",
+        pincode="400050",
+        weight_kg=0.60,
+        sku_summary=f"Return: {ret.reason or 'Size Exchange'}",
+        is_return=True
+    )
+    return HTMLResponse(content=label_html)
 

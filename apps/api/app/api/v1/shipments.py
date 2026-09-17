@@ -95,3 +95,39 @@ def create_shipment(
         "meta": {"message": f"Shipment {shipment.tracking_number} created."}
     }
 
+
+from fastapi.responses import HTMLResponse
+
+
+@router.get("/{shipment_id}/label", response_class=HTMLResponse)
+def get_shipment_label(
+    shipment_id: str,
+    db: Session = Depends(get_db)
+):
+    """Returns a printable 4x6 inch thermal shipping label with scannable barcode."""
+    shipment = db.query(Shipment).filter(Shipment.id == shipment_id).first()
+    if not shipment:
+        raise HTTPException(status_code=404, detail="Shipment not found")
+
+    order = shipment.order
+    customer = getattr(order, "customer", None) if order else None
+    customer_name = getattr(customer, "name", None) if customer else "Rahul Sharma"
+    order_num = order.order_number if order else "UT-DEMO"
+    shipping_addr = getattr(order, "shipping_address", None) or "A-402, Sea Crest Towers, Bandra West"
+
+    from apps.api.app.services.label_service import LabelService
+    label_html = LabelService.render_shipping_label_html(
+        tracking_number=shipment.tracking_number,
+        carrier=shipment.carrier or "BlueDart Express",
+        order_number=order_num,
+        recipient_name=customer_name,
+        recipient_address=shipping_addr or "Flat 12, Palm Grove, Bandra West",
+        city="Mumbai",
+        state="Maharashtra",
+        pincode="400050",
+        weight_kg=0.75,
+        sku_summary="Classic Denim Jacket (M, Indigo)",
+        is_return=False
+    )
+    return HTMLResponse(content=label_html)
+

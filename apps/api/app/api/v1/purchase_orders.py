@@ -175,3 +175,31 @@ def approve_purchase_order(
     db.commit()
     return {"message": f"Purchase order {po.po_number} approved", "status": po.status}
 
+
+class AutoNegotiateRequest(BaseModel):
+    sku: str = Field(default="UT-JAC-DEN-01", example="UT-JAC-DEN-01")
+    quantity: int = Field(default=100, ge=10, le=5000, example=100)
+    target_delivery_days: int = Field(default=7, example=7)
+
+
+@router.post("/auto-negotiate")
+def auto_negotiate_supplier_po(
+    payload: AutoNegotiateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Priya (Purchasing AI) Persona Endpoint:
+    Simulates automated multi-supplier RFQ negotiation across apparel mills, compares price tiers,
+    volume discounts, and lead times, selecting the best bid and drafting an optimized Purchase Order.
+    """
+    from apps.api.app.services.supplier_negotiation_service import SupplierNegotiationService
+    result = SupplierNegotiationService.run_competitive_rfq(
+        db=db,
+        organization_id=current_user.organization_id,
+        sku=payload.sku,
+        quantity=payload.quantity,
+        target_delivery_days=payload.target_delivery_days
+    )
+    return {"data": result}
+

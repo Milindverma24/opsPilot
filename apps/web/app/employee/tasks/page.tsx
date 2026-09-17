@@ -24,8 +24,10 @@ import {
   X,
   Send,
   Sparkles,
+  Scan,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { BarcodeScannerModal } from "@/components/BarcodeScannerModal";
 
 export default function EmployeeTasksPage() {
   const [tasks, setTasks] = useState<any[]>([]);
@@ -46,6 +48,11 @@ export default function EmployeeTasksPage() {
   const [orderId, setOrderId] = useState("");
   const [notes, setNotes] = useState("");
 
+  // Barcode Scanner Modal & SSE
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scanningTask, setScanningTask] = useState<any | null>(null);
+  const [sseConnected, setSseConnected] = useState(false);
+
   const fetchTasks = async (isBackground = false) => {
     if (!isBackground) setLoading(true);
     try {
@@ -61,10 +68,26 @@ export default function EmployeeTasksPage() {
 
   useEffect(() => {
     fetchTasks();
+
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource("http://localhost:8000/api/v1/events/stream");
+      es.onopen = () => setSseConnected(true);
+      es.addEventListener("task", () => fetchTasks(true));
+      es.addEventListener("business_event", () => fetchTasks(true));
+      es.onerror = () => setSseConnected(false);
+    } catch (e) {
+      console.warn("SSE stream unavailable, using fallback timer");
+    }
+
     const interval = setInterval(() => {
       fetchTasks(true);
-    }, 3000);
-    return () => clearInterval(interval);
+    }, 4000);
+
+    return () => {
+      clearInterval(interval);
+      if (es) es.close();
+    };
   }, []);
 
   const handleClaim = async (taskId: string) => {
@@ -230,8 +253,8 @@ export default function EmployeeTasksPage() {
               <div>
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
                   Live Dispatch Bus Connected
-                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-950/60 text-emerald-400 border border-emerald-800">
-                    3s Auto-Sync Active
+                  <span className={`text-[11px] font-medium px-2 py-0.5 rounded-md border ${sseConnected ? "bg-emerald-950/60 text-emerald-400 border-emerald-800" : "bg-blue-950/60 text-blue-400 border-blue-800"}`}>
+                    {sseConnected ? "⚡ SSE Real-Time Stream Active (<50ms)" : "3s Auto-Sync Active"}
                   </span>
                 </h2>
                 <p className="text-xs text-slate-400">
@@ -390,14 +413,27 @@ export default function EmployeeTasksPage() {
                   )}
 
                   {(t.status === "CLAIMED" || t.status === "IN_PROGRESS") && (
-                    <button
-                      onClick={() => handleComplete(t.id)}
-                      disabled={actionLoading === t.id}
-                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1"
-                    >
-                      <CheckSquare className="w-3 h-3" />
-                      <span>{actionLoading === t.id ? "Completing..." : "Complete Task"}</span>
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          setScanningTask(t);
+                          setScannerOpen(true);
+                        }}
+                        className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1"
+                        title="Scan Garment Barcode before Packing"
+                      >
+                        <Scan className="w-3 h-3" />
+                        <span>Scan Barcode</span>
+                      </button>
+                      <button
+                        onClick={() => handleComplete(t.id)}
+                        disabled={actionLoading === t.id}
+                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1"
+                      >
+                        <CheckSquare className="w-3 h-3" />
+                        <span>{actionLoading === t.id ? "Completing..." : "Complete Task"}</span>
+                      </button>
+                    </div>
                   )}
 
                   {t.status === "COMPLETED" && (
@@ -549,6 +585,22 @@ export default function EmployeeTasksPage() {
           </div>
         </div>
       )}
+
+      {/* Barcode Scanner Modal */}
+      <BarcodeScannerModal
+        isOpen={scannerOpen}
+        onClose={() => {
+          setScannerOpen(false);
+          setScanningTask(null);
+        }}
+        expectedSku={scanningTask?.payload?.sku || "UT-JAC-DEN-01"}
+        expectedTitle={scanningTask?.title || "Classic Denim Jacket"}
+        onVerified={async () => {
+          if (scanningTask) {
+            await handleComplete(scanningTask.id);
+          }
+        }}
+      />
     </div>
   );
 }

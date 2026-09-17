@@ -12,6 +12,7 @@ Endpoints:
 """
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 
@@ -101,6 +102,58 @@ def list_pending_approvals(
     db: Session = Depends(get_db),
 ):
     return list_approvals(status="PENDING", current_user=current_user, db=db)
+
+
+@router.get("/interactive-action", response_class=HTMLResponse)
+def execute_interactive_action(
+    token: str = Query(..., description="Signed 1-click action token"),
+    db: Session = Depends(get_db)
+):
+    """
+    Executes 1-click approval or rejection from Slack or external emails without requiring login.
+    Cryptographically verifies the HMAC signature and time-to-live before mutation.
+    """
+    from apps.api.app.services.notification_service import NotificationService
+    verified = NotificationService.verify_approval_action_token(token)
+    if not verified:
+        return HTMLResponse(
+            status_code=400,
+            content="""<!DOCTYPE html><html><body style="font-family:system-ui;text-align:center;padding:50px;background:#0f172a;color:#f87171;">
+            <h1>❌ Invalid or Expired Approval Token</h1>
+            <p>This approval link has expired or the cryptographic signature was invalid.</p>
+            <a href="http://localhost:3000/approvals" style="color:#38bdf8;">Open OpsPilot Approvals Dashboard</a>
+            </body></html>"""
+        )
+
+    aid = verified["aid"]
+    act = verified["act"]
+    org_id = verified["org"]
+
+    approval = db.query(Approval).filter(Approval.id == aid, Approval.organization_id == org_id).first()
+    if not approval:
+        raise HTTPException(status_code=404, detail="Approval not found")
+
+    # Find system/admin actor
+    admin_user = db.query(User).filter(User.organization_id == org_id).first()
+
+    if act == "APPROVE":
+        ApprovalService.approve(aid, admin_user, "Approved via 1-Click Interactive Token", db)
+        msg = f"✅ Successfully APPROVED payout for ₹{approval.amount:,.2f} ({approval.title})"
+        color = "#34d399"
+    else:
+        ApprovalService.reject(aid, admin_user, "Rejected via 1-Click Interactive Token", db)
+        msg = f"❌ Successfully REJECTED request: {approval.title}"
+        color = "#f87171"
+
+    return HTMLResponse(
+        content=f"""<!DOCTYPE html><html><body style="font-family:system-ui;text-align:center;padding:50px;background:#0f172a;color:#f8fafc;">
+        <h1 style="color:{color};">{msg}</h1>
+        <p style="color:#94a3b8;">Cryptographic action verification succeeded. State has been committed to the immutable audit log.</p>
+        <div style="margin-top:30px;">
+            <a href="http://localhost:3000/approvals" style="display:inline-block;padding:10px 20px;background:#2563eb;color:#ffffff;border-radius:6px;text-decoration:none;font-weight:600;">Return to OpsPilot Console</a>
+        </div>
+        </body></html>"""
+    )
 
 
 @router.get("/{approval_id}")
@@ -218,3 +271,21 @@ def add_approval_comment(
         "comment": comm.comment,
         "created_at": comm.created_at.isoformat() if comm.created_at else None,
     }
+
+
+@router.get("/{approval_id}/slack-card")
+def get_slack_approval_card(
+    approval_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Generates Slack Block Kit payload with signed 1-click approval tokens."""
+    approval = db.query(Approval).filter(
+        Approval.id == approval_id,
+        Approval.organization_id == current_user.organization_id
+    ).first()
+    if not approval:
+        raise HTTPException(status_code=404, detail="Approval not found")
+
+    from apps.api.app.services.notification_service import NotificationService
+    return NotificationService.build_slack_approval_card(approval)

@@ -75,13 +75,25 @@ class ReturnService:
         if not is_eligible:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=eligibility_reason)
 
+        # Evaluate return fraud & wardrobing risk
+        from apps.api.app.services.fraud_detection_service import FraudDetectionService
+        fraud_eval = FraudDetectionService.evaluate_return_fraud_risk(
+            db=db,
+            organization_id=organization_id,
+            customer_id=customer_id,
+            order_id=order_id,
+            return_reason=reason,
+            refund_amount=float(order.total_amount or 0.0)
+        )
+
         ret_num = f"RET-{generate_uuid()[:8].upper()}"
+        initial_status = "PENDING_INSPECTION" if fraud_eval["fraud_tier"] == "HIGH" else "REQUESTED"
         ret = Return(
             organization_id=organization_id,
             order_id=order_id,
             customer_id=customer_id,
             return_number=ret_num,
-            status="REQUESTED",
+            status=initial_status,
             reason=reason.upper(),
             requested_at=get_utc_now()
         )
@@ -112,7 +124,13 @@ class ReturnService:
             resource_type="return",
             resource_id=ret.id,
             result="SUCCESS",
-            log_metadata={"return_number": ret_num, "reason": reason}
+            log_metadata={
+                "return_number": ret_num,
+                "reason": reason,
+                "fraud_tier": fraud_eval["fraud_tier"],
+                "fraud_score": fraud_eval["risk_score"],
+                "is_wardrobing": fraud_eval["is_wardrobing_suspect"]
+            }
         )
         db.add(audit)
         db.commit()
@@ -122,8 +140,13 @@ class ReturnService:
             organization_id=organization_id,
             event_type="RETURN_REQUESTED",
             title=f"Return {ret_num} requested for order {order.order_number}",
-            content=f"Reason: {reason}.",
-            metadata={"return_id": ret.id, "order_id": order_id}
+            content=f"Reason: {reason}. Fraud Assessment: {fraud_eval['fraud_tier']} Risk ({fraud_eval['risk_score']}).",
+            metadata={
+                "return_id": ret.id,
+                "order_id": order_id,
+                "fraud_tier": fraud_eval["fraud_tier"],
+                "is_wardrobing": fraud_eval["is_wardrobing_suspect"]
+            }
         )
 
         return ret

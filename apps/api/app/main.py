@@ -52,6 +52,9 @@ from apps.api.app.api.v1.learning import router as learning_router
 from apps.api.app.api.v1.security import router as security_router
 from apps.api.app.api.v1.tasks import router as tasks_router
 from apps.api.app.api.v1.purchase_orders import router as purchase_orders_router
+from apps.api.app.api.v1.webhooks import router as webhooks_router
+from apps.api.app.api.v1.events_stream import router as events_stream_router
+from apps.api.app.api.v1.daily_briefing import router as daily_briefing_router
 
 
 
@@ -179,6 +182,9 @@ app.include_router(learning_router, prefix=api_v1_prefix)
 app.include_router(security_router, prefix=api_v1_prefix)
 app.include_router(tasks_router, prefix=api_v1_prefix)
 app.include_router(purchase_orders_router, prefix=api_v1_prefix)
+app.include_router(webhooks_router, prefix=api_v1_prefix)
+app.include_router(events_stream_router, prefix=api_v1_prefix)
+app.include_router(daily_briefing_router, prefix=api_v1_prefix)
 
 
 

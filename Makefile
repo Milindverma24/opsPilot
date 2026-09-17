@@ -68,17 +68,17 @@ knowledge:
 	.venv/bin/python scripts/seed_synthetic_website.py
 
 test:
-	.venv/bin/pytest tests/unit tests/api apps/api/tests -v
+	PYTHONPATH=. .venv/bin/pytest tests/unit apps/api/tests -v
 
 test-ai:
-	.venv/bin/pytest tests/ai -v
-	.venv/bin/python scripts/evaluate_ai.py
+	PYTHONPATH=. .venv/bin/pytest tests/ai -v
+	PYTHONPATH=. .venv/bin/python scripts/evaluate_ai.py
 
 test-security:
-	.venv/bin/pytest tests/security -v
+	PYTHONPATH=. .venv/bin/pytest tests/security -v
 
 test-e2e:
-	.venv/bin/pytest tests/e2e -v
+	PYTHONPATH=. .venv/bin/pytest tests/e2e -v
 
 test-all: test test-ai test-security test-e2e
 	@echo "All test lab suites passed successfully."
@@ -107,3 +107,10 @@ run-web:
 
 run-worker:
 	.venv/bin/celery -A apps.api.app.core.celery_app worker --loglevel=info
+
+n8n-up:
+	docker compose -f docker-compose.n8n.yml up -d
+	@echo "n8n started at http://localhost:5678"
+
+n8n-down:
+	docker compose -f docker-compose.n8n.yml down

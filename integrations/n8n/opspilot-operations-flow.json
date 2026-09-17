@@ -1,0 +1,423 @@
+{
+  "name": "OpsPilot Autonomous Operations & Approvals Flow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "opspilot-events",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook-trigger",
+      "name": "Webhook — Inbound E-Commerce Event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        220,
+        340
+      ],
+      "webhookId": "opspilot-inbound-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node['Config Constants'].json.apiUrl }}/auth/login",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"email\": \"{{ $node['Config Constants'].json.adminEmail }}\",\n  \"password\": \"{{ $node['Config Constants'].json.adminPassword }}\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "node-auth-login",
+      "name": "OpsPilot — JWT Authentication",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        640,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "apiUrl",
+              "value": "http://localhost:8000/api/v1"
+            },
+            {
+              "name": "adminEmail",
+              "value": "admin@urbanthread.local"
+            },
+            {
+              "name": "adminPassword",
+              "value": "DemoPassword123!"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-config-constants",
+      "name": "Config Constants",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        440,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $('Webhook — Inbound E-Commerce Event').item.json.body.action_type || $('Webhook — Inbound E-Commerce Event').item.json.body.event_type }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "CUSTOMER_CHAT",
+              "output": 0
+            },
+            {
+              "value2": "ORDER_CREATED",
+              "output": 1
+            },
+            {
+              "value2": "RETURN_REQUEST",
+              "output": 2
+            },
+            {
+              "value2": "CHECK_APPROVALS",
+              "output": 3
+            }
+          ]
+        },
+        "fallbackOutput": 1
+      },
+      "id": "node-switch-event-router",
+      "name": "Router — Event Mandate",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        860,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config Constants').item.json.apiUrl }}/customer-ai/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('OpsPilot — JWT Authentication').item.json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $('Webhook — Inbound E-Commerce Event').item.json.body.message || 'Order status lookup' }}\",\n  \"customer_id\": \"{{ $('Webhook — Inbound E-Commerce Event').item.json.body.customer_id || 'cust-demo-01' }}\",\n  \"order_number\": \"{{ $('Webhook — Inbound E-Commerce Event').item.json.body.order_number || '' }}\"\n}",
+        "options": {}
+      },
+      "id": "node-aria-customer-ai",
+      "name": "Aria AI — Customer Experience Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1140,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config Constants').item.json.apiUrl }}/events",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('OpsPilot — JWT Authentication').item.json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": \"{{ $('Webhook — Inbound E-Commerce Event').item.json.body.title || 'New Order Event' }}\",\n  \"content\": \"{{ $('Webhook — Inbound E-Commerce Event').item.json.body.content || 'Order fulfillment requested' }}\",\n  \"source\": \"N8N_AUTOMATION\",\n  \"event_type\": \"{{ $('Webhook — Inbound E-Commerce Event').item.json.body.event_type || 'ORDER_CREATED' }}\",\n  \"metadata\": {{ JSON.stringify($('Webhook — Inbound E-Commerce Event').item.json.body.metadata || {}) }}\n}",
+        "options": {}
+      },
+      "id": "node-ops-workforce-engine",
+      "name": "Alex AI — Order & Warehouse Engine",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1140,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config Constants').item.json.apiUrl }}/events",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('OpsPilot — JWT Authentication').item.json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": \"Return Request: {{ $('Webhook — Inbound E-Commerce Event').item.json.body.order_number || 'UT-DEMO' }}\",\n  \"content\": \"{{ $('Webhook — Inbound E-Commerce Event').item.json.body.reason || 'Customer requested return and refund.' }}\",\n  \"source\": \"N8N_AUTOMATION\",\n  \"event_type\": \"RETURN_REQUEST\",\n  \"metadata\": {\n    \"amount\": {{ $('Webhook — Inbound E-Commerce Event').item.json.body.amount || 1500 }},\n    \"order_number\": \"{{ $('Webhook — Inbound E-Commerce Event').item.json.body.order_number || 'UT-DEMO' }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "node-sam-reverse-logistics",
+      "name": "Sam AI — Returns & Reverse Logistics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1140,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $('Webhook — Inbound E-Commerce Event').item.json.body.amount || 0 }}",
+              "operation": "larger",
+              "value2": 2000
+            }
+          ]
+        }
+      },
+      "id": "node-check-high-risk-threshold",
+      "name": "Risk Gate — Amount > ₹2,000?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config Constants').item.json.apiUrl }}/approvals",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('OpsPilot — JWT Authentication').item.json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-fetch-approvals-queue",
+      "name": "OpsPilot — Fetch Pending Approvals",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1140,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "alert_channel",
+              "value": "SLACK_MANAGER_OPS"
+            },
+            {
+              "name": "alert_title",
+              "value": "🚨 High-Value Financial Refund Blocked (> ₹2,000)"
+            },
+            {
+              "name": "alert_message",
+              "value": "=Action required: Return for ₹{{ $('Webhook — Inbound E-Commerce Event').item.json.body.amount }} requires manager signature in OpsPilot Command Center."
+            },
+            {
+              "name": "approval_url",
+              "value": "http://localhost:3000/approvals"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-notify-manager-approval",
+      "name": "Human-in-the-Loop — Manager Alert Card",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1640,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"platform\": \"OpsPilot — Local Autonomous Business Operations Agent\",\n  \"event_dispatched\": true,\n  \"pipeline_result\": {{ JSON.stringify($json) }},\n  \"telemetry\": {\n    \"execution_timestamp\": \"{{ new Date().toISOString() }}\",\n    \"fastapi_backend\": \"http://localhost:8000\",\n    \"command_center\": \"http://localhost:3000\"\n  }\n}",
+        "options": {}
+      },
+      "id": "node-respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        340
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook — Inbound E-Commerce Event": {
+      "main": [
+        [
+          {
+            "node": "Config Constants",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Constants": {
+      "main": [
+        [
+          {
+            "node": "OpsPilot — JWT Authentication",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpsPilot — JWT Authentication": {
+      "main": [
+        [
+          {
+            "node": "Router — Event Mandate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router — Event Mandate": {
+      "main": [
+        [
+          {
+            "node": "Aria AI — Customer Experience Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alex AI — Order & Warehouse Engine",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sam AI — Returns & Reverse Logistics",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpsPilot — Fetch Pending Approvals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aria AI — Customer Experience Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alex AI — Order & Warehouse Engine": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sam AI — Returns & Reverse Logistics": {
+      "main": [
+        [
+          {
+            "node": "Risk Gate — Amount > ₹2,000?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risk Gate — Amount > ₹2,000?": {
+      "main": [
+        [
+          {
+            "node": "Human-in-the-Loop — Manager Alert Card",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Human-in-the-Loop — Manager Alert Card": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpsPilot — Fetch Pending Approvals": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

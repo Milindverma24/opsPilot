@@ -45,3 +45,12 @@ storage/
 
 # Scratch
 scratch/
+
+# Java / Maven / Spring Boot
+target/
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+

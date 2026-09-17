@@ -98,7 +98,10 @@ const ingestionNavItems: NavItem[] = [
 ];
 
 const ecommerceNavItems: NavItem[] = [
-  { name: "Orders", href: "/orders", icon: ShoppingBag },
+  { name: "UrbanThread Store", href: "/store", icon: ShoppingBag, highlight: true, badge: "Store" },
+  { name: "Add Product (Studio)", href: "/products/new", icon: Sparkles, highlight: true, badge: "New" },
+  { name: "Customer AI (Aria)", href: "/customer/chat", icon: Headphones, highlight: true, badge: "RAG" },
+  { name: "Orders", href: "/orders", icon: Package },
   { name: "Refunds", href: "/refunds", icon: RotateCcw },
   { name: "Purchase Orders", href: "/purchase-orders", icon: Boxes },
   { name: "Products", href: "/products", icon: Package },

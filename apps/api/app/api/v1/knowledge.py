@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 
 from apps.api.app.core.database import get_db
-from apps.api.app.core.security import get_current_user
+from apps.api.app.core.security import get_current_user, get_current_user_optional
 from apps.api.app.models.tenant import User
 from apps.api.app.models.knowledge import KnowledgeDocument
 from apps.api.app.services.knowledge_service import KnowledgeService
@@ -92,11 +92,19 @@ def upload_knowledge_document(
 @router.post("/search")
 def search_knowledge(
     payload: SearchRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
+    org_id = current_user.organization_id if current_user else None
+    if not org_id:
+        from apps.api.app.models.tenant import Organization
+        org = db.query(Organization).filter(Organization.slug == "urbanthread").first()
+        if not org:
+            org = db.query(Organization).first()
+        org_id = org.id if org else None
+
     results = KnowledgeService.search(
-        organization_id=current_user.organization_id,
+        organization_id=org_id,
         query=payload.query,
         top_k=payload.top_k,
         db=db
@@ -107,12 +115,46 @@ def search_knowledge(
 @router.post("/ask")
 def ask_policy_rag(
     payload: QuestionRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
+    org_id = current_user.organization_id if current_user else None
+    if not org_id:
+        from apps.api.app.models.tenant import Organization
+        org = db.query(Organization).filter(Organization.slug == "urbanthread").first()
+        if not org:
+            org = db.query(Organization).first()
+        org_id = org.id if org else None
+
     ans = KnowledgeService.answer_policy_question(
-        organization_id=current_user.organization_id,
+        organization_id=org_id,
         question=payload.question,
         db=db
     )
     return ans
+
+
+@router.post("/sync-catalog")
+def sync_catalog_to_rag(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Triggers complete RAG vector re-indexing of all products, sizing guides,
+    fabric care handbooks, and e-commerce policies.
+    """
+    from scripts.seed_clothing_rag_knowledge import seed_clothing_rag
+    from apps.api.app.models.knowledge import KnowledgeChunk
+    seed_clothing_rag(db)
+    docs_count = db.query(KnowledgeDocument).filter(
+        KnowledgeDocument.organization_id == current_user.organization_id
+    ).count()
+    chunks_count = db.query(KnowledgeChunk).filter(
+        KnowledgeChunk.organization_id == current_user.organization_id
+    ).count()
+    return {
+        "status": "SUCCESS",
+        "message": "Clothing catalog and fashion SOPs successfully trained and indexed into RAG.",
+        "documents_count": docs_count,
+        "chunks_count": chunks_count
+    }

@@ -1,0 +1,99 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: opspilot-spring-rag
+  profiles:
+    active: dev
+
+  # Relational & Vector Database Configuration
+  # Defaults to fast in-memory H2 (PostgreSQL mode) for instant local zero-setup execution.
+  # Automatically connects to external PostgreSQL when SPRING_DATASOURCE_URL is provided.
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:opspilot_rag;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 20000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      mode: never
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+  # File Upload Configuration
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+
+  # Spring AI Configuration (Configurable LLM & Embeddings)
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:mock-key-for-local-viva}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      chat:
+        options:
+          model: ${OPENAI_CHAT_MODEL:gpt-4o}
+          temperature: 0.2
+      embedding:
+        options:
+          model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
+
+# OpsPilot RAG Architecture Parameters
+opspilot:
+  rag:
+    organization-id: urbanthread
+    embedding:
+      dimensions: 1536
+      use-local-deterministic-fallback: ${USE_LOCAL_EMBEDDINGS:true}
+    chunking:
+      chunk-size: 500
+      chunk-overlap: 80
+      min-chunk-size: 100
+    retrieval:
+      top-k: 3
+      min-similarity-threshold: 0.15
+      hybrid-vector-weight: 0.70
+      hybrid-lexical-weight: 0.30
+      rrf-k: 60
+
+# SpringDoc OpenAPI Documentation
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+# Actuator Health & Metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

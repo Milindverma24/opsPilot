@@ -35,7 +35,7 @@ INJECTION_RULES = [
         0.95,
     ),
     (
-        r"(?i)(pretend\s+you\s+are|let's\s+roleplay|roleplay\s+as|assume\s+you\s+are|imagine\s+a\s+world|act\s+as\s+an?|hypothetical\s+simulation|you\s+are\s+now\s+'?jailbreak|dan\s+mode|unrestricted\s+ai)",
+        r"(?i)(pretend\s+you\s+are|let's\s+roleplay|roleplay\s+as|assume\s+you\s+are|imagine\s+a\s+world|act\s+as\s+an?|hypothetical\s+simulation|you\s+are\s+now\s+'?jailbreak|dan\s+mode|unrestricted\s+ai|developer\s+mode)",
         "INSTRUCTION_OVERRIDE",
         "Persona hijacking / jailbreak attempt",
         0.95,
@@ -69,7 +69,7 @@ INJECTION_RULES = [
 
     # 3. DATA_EXFILTRATION
     (
-        r"(?i)(export|send|dump|exfiltrate|transmit|forward|list|leak|show\s+me|extract|what\s+are)\s+.*?(customer|user|order|financial|credit\s+card|database|db|tenant|salary|revenue|profit|passwords|top\s+100|memory\s+database|full\s+names|bank\s+account|spenders|conversations)",
+        r"(?i)((export|dump|exfiltrate|transmit|forward|leak|extract)\s+.*?(customer|user|order|financial|credit\s+card|database|db|tenant|salary|revenue|profit|passwords|top\s+100|memory\s+database|full\s+names|bank\s+account|spenders|conversations)|(show\s+me|list|what\s+are)\s+.*?(passwords?|credit\s+card|bank\s+account|salary|revenue|database|db\b|all\s+customer\s+records|all\s+customer\s+data))",
         "DATA_EXFILTRATION",
         "Mass customer/tenant data exfiltration request",
         0.98,
@@ -97,19 +97,25 @@ INJECTION_RULES = [
 
     # 5. PRIVILEGE_ESCALATION & CROSS_TENANT ATTACKS
     (
-        r"(?i)(grant|elevate|give)\s+(me|user)\s+(admin|superadmin|root|manager)\s+(role|permissions|access|rights)",
+        r"(?i)(grant|elevate|give)\s+(me|user)\s+(admin|superadmin|super_admin|root|manager)\s+(role|permissions|access|rights)",
         "PRIVILEGE_ESCALATION",
         "Privilege escalation request",
         0.95,
     ),
     (
-        r"(?i)(switch|set|override|change)\s+.*?(my\s+role|to\s+role|organization\s+context|session\.tenant_id|tenant_id|tenant\s+context)|X-Tenant-Override|bypass\s+row\s+level\s+security|shared\s+vector\s+index",
+        r"(?i)(switch|set|change|override)\s+(my\s+role|role)\s+to\s+(admin|superadmin|super_admin|root|manager)",
+        "PRIVILEGE_ESCALATION",
+        "Direct role elevation request",
+        0.95,
+    ),
+    (
+        r"(?i)(switch|set|override|change)\s+.*?(organization\s+context|session\.tenant_id|tenant_id|tenant\s+context)|X-Tenant-Override|bypass\s+row\s+level\s+security|shared\s+vector\s+index",
         "CROSS_TENANT_ATTACK",
         "Cross-tenant access attempt",
         0.98,
     ),
     (
-        r"(?i)(belonging\s+to\s+(acme|beta|globex)|orders\s+belonging\s+to\s+acme|beta\s+corp|tenant\s+'\*'|list\s+all\s+tenant\s+ids|tenant\s+0000|tenant\s+[a-z]|impersonate\s+user|(organization|tenant|org)\s+['\"`][\w-]+['\"`]|(for|by|inside|of)\s+(organization|tenant|org))",
+        r"(?i)(belonging\s+to\s+tenant|orders\s+belonging\s+to\s+acme\s+industries|tenant\s+'\*'|list\s+all\s+tenant\s+ids|tenant\s+0000|impersonate\s+user|(organization|tenant|org)\s+['\"`][\w-]+['\"`]|(inside|of)\s+(organization|tenant)\s+['\"`])",
         "CROSS_TENANT_ATTACK",
         "Targeted cross-tenant query",
         0.92,
@@ -169,7 +175,15 @@ INJECTION_RULES = [
         0.90,
     ),
 
-    # 9. OBFUSCATED ATTACKS & DOS
+    # 9. SOCIAL ENGINEERING & AUTHORITY IMPERSONATION
+    (
+        r"(?i)(this\s+is\s+the\s+(ceo|cto|cfo|director|boss|founder|owner|executive)|speaking,\s+you\s+must|urgent\s+executive\s+override|i\s+am\s+the\s+ceo|speaking\s+you\s+must\s+approve)",
+        "SOCIAL_ENGINEERING",
+        "Authority impersonation and executive pressure",
+        0.95,
+    ),
+
+    # 10. OBFUSCATED ATTACKS & DOS
     (
         r"(SWdub3Jl|49676e6f7265|I\.g\.n\.o\.r\.e|I_g_n_o_r_e|Reversetext|Rot13|01001001|homoglyph|z-w-s-p|morse\s+code)",
         "OBFUSCATED_ATTACK",

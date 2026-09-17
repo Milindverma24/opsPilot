@@ -226,3 +226,60 @@ def cancel_order(
         actor_id=current_user.id
     )
     return {"status": "success", "message": f"Order {order.order_number} has been cancelled."}
+
+
+@router.post("/{order_id}/mark-shipped")
+def mark_order_shipped(
+    order_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    import uuid, datetime
+    from apps.api.app.models.ecommerce import Shipment
+
+    order = db.query(Order).filter(
+        Order.id == order_id,
+        Order.organization_id == current_user.organization_id
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    order.status = "SHIPPED"
+    order.fulfillment_status = "SHIPPED"
+    
+    existing_shipment = db.query(Shipment).filter(Shipment.order_id == order.id).first()
+    if not existing_shipment:
+        sh = Shipment(
+            organization_id=current_user.organization_id,
+            order_id=order.id,
+            tracking_number=f"TRK-EXP-{uuid.uuid4().hex[:8].upper()}",
+            carrier="Delhivery Express",
+            status="IN_TRANSIT",
+            shipping_method="EXPRESS_SURFACE",
+            dispatched_at=datetime.datetime.utcnow(),
+            estimated_delivery=datetime.datetime.utcnow() + datetime.timedelta(days=3),
+            current_location="Delhi Regional Fulfillment Hub"
+        )
+        db.add(sh)
+    db.commit()
+    return {"message": f"Order {order.order_number} marked as SHIPPED", "status": order.status}
+
+
+@router.post("/{order_id}/mark-delivered")
+def mark_order_delivered(
+    order_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    order = db.query(Order).filter(
+        Order.id == order_id,
+        Order.organization_id == current_user.organization_id
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    order.status = "DELIVERED"
+    order.fulfillment_status = "DELIVERED"
+    db.commit()
+    return {"message": f"Order {order.order_number} marked as DELIVERED", "status": order.status}
+

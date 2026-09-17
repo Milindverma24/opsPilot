@@ -233,6 +233,10 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ question }),
       }),
+    syncCatalog: () =>
+      apiFetch<any>("/knowledge/sync-catalog", {
+        method: "POST",
+      }),
   },
   audit: {
     list: (params?: { action?: string; actor_type?: string; resource_type?: string }) => {
@@ -306,6 +310,14 @@ export const api = {
       apiFetch<any>(`/orders/${id}/cancel`, {
         method: "POST",
       }),
+    markShipped: (id: string) =>
+      apiFetch<any>(`/orders/${id}/mark-shipped`, {
+        method: "POST",
+      }),
+    markDelivered: (id: string) =>
+      apiFetch<any>(`/orders/${id}/mark-delivered`, {
+        method: "POST",
+      }),
   },
   customers: {
     list: (params?: { page?: number; page_size?: number; search?: string }) => {
@@ -313,12 +325,16 @@ export const api = {
       return apiFetch<any>(`/customers${qs ? `?${qs}` : ""}`);
     },
     get: (id: string) => apiFetch<any>(`/customers/${id}`),
+    create: (data: { name: string; email: string; phone?: string; status?: string }) =>
+      apiFetch<any>("/customers", { method: "POST", body: JSON.stringify(data) }),
   },
   shipments: {
     list: (params?: { page?: number; page_size?: number; status?: string }) => {
       const qs = new URLSearchParams(params as any).toString();
       return apiFetch<any>(`/shipments${qs ? `?${qs}` : ""}`);
     },
+    create: (data: { order_id: string; carrier?: string }) =>
+      apiFetch<any>("/shipments", { method: "POST", body: JSON.stringify(data) }),
     updateStatus: (id: string, data: { status: string; last_location?: string }) =>
       apiFetch<any>(`/shipments/${id}/status`, {
         method: "PUT",
@@ -330,8 +346,14 @@ export const api = {
       const qs = new URLSearchParams(params as any).toString();
       return apiFetch<any>(`/returns${qs ? `?${qs}` : ""}`);
     },
+    request: (data: { order_id: string; customer_id: string; items: any[]; reason: string }) =>
+      apiFetch<any>("/returns", { method: "POST", body: JSON.stringify(data) }),
     approve: (id: string) =>
       apiFetch<any>(`/returns/${id}/approve`, {
+        method: "POST",
+      }),
+    reject: (id: string) =>
+      apiFetch<any>(`/returns/${id}/reject`, {
         method: "POST",
       }),
   },
@@ -350,18 +372,24 @@ export const api = {
   },
   coupons: {
     list: () => apiFetch<any>("/coupons"),
+    create: (data: any) => apiFetch<any>("/coupons", { method: "POST", body: JSON.stringify(data) }),
+    validate: (data: { code: string; subtotal: number }) =>
+      apiFetch<any>("/coupons/validate", { method: "POST", body: JSON.stringify(data) }),
   },
   support: {
     tickets: (params?: { page?: number; page_size?: number; status?: string; priority?: string }) => {
       const qs = new URLSearchParams(params as any).toString();
       return apiFetch<any>(`/support/tickets${qs ? `?${qs}` : ""}`);
     },
+    createTicket: (data: { customer_id: string; subject: string; description: string; priority?: string; order_id?: string }) =>
+      apiFetch<any>("/support/tickets", { method: "POST", body: JSON.stringify(data) }),
     conversation: (customerId: string) => apiFetch<any>(`/support/conversations/${customerId}`),
-    addMessage: (conversationId: string, data: { sender_type: string; content: string }) =>
+    addMessage: (conversationId: string, data: { sender_type: string; content: string; message_type?: string }) =>
       apiFetch<any>(`/support/conversations/${conversationId}/messages`, {
         method: "POST",
         body: JSON.stringify(data),
       }),
+    resolve: (ticketId: string) => apiFetch<any>(`/support/tickets/${ticketId}/resolve`, { method: "POST" }),
   },
   websites: {
     list: () => apiFetch<any>("/websites"),
@@ -435,7 +463,7 @@ export const api = {
     checkSla: () => apiFetch<any>("/escalations/check-sla", { method: "POST" }),
   },
   customer: {
-    startConversation: (data?: { channel?: string; customer_id?: string; organization_slug?: string }) =>
+    startConversation: (data?: { channel?: string; customer_id?: string; organization_slug?: string; order_id?: string; order_details?: any }) =>
       apiFetch<any>("/customer/conversations", {
         method: "POST",
         body: JSON.stringify(data || {}),
@@ -618,5 +646,9 @@ export const api = {
       return apiFetch<any>(`/purchase-orders${qs ? `?${qs}` : ""}`);
     },
     get: (id: string) => apiFetch<any>(`/purchase-orders/${id}`),
+    create: (data: { vendor_name?: string; department?: string; total: number; items?: any[] }) =>
+      apiFetch<any>("/purchase-orders", { method: "POST", body: JSON.stringify(data) }),
+    approve: (id: string) =>
+      apiFetch<any>(`/purchase-orders/${id}/approve`, { method: "POST" }),
   },
 };

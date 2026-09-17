@@ -163,3 +163,34 @@ def add_customer_address(
     db.refresh(address)
 
     return {"data": {"id": address.id, "city": address.city}, "meta": {"message": "Address added."}}
+
+
+class CreateCustomerRequest(BaseModel):
+    name: str
+    email: str
+    phone: Optional[str] = None
+    status: str = "ACTIVE"
+
+
+@router.post("", status_code=status.HTTP_201_CREATED)
+def create_customer(
+    payload: CreateCustomerRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    import uuid
+    num = f"CUST-{generate_uuid()[:6].upper()}"
+    cust = Customer(
+        id=str(uuid.uuid4()),
+        organization_id=current_user.organization_id,
+        customer_number=num,
+        name=payload.name,
+        email=payload.email,
+        phone=payload.phone,
+        status=payload.status
+    )
+    db.add(cust)
+    db.commit()
+    db.refresh(cust)
+    return {"data": {"id": cust.id, "customer_number": cust.customer_number, "name": cust.name}}
+

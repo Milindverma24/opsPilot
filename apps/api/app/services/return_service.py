@@ -154,6 +154,21 @@ class ReturnService:
         return ret
 
     @staticmethod
+    def reject_return(db: Session, return_id: str, organization_id: str, reason: str = "Inspection condition failed", actor_id: str = "system") -> Return:
+        ret = db.query(Return).filter(
+            Return.id == return_id,
+            Return.organization_id == organization_id
+        ).first()
+
+        if not ret:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Return record not found.")
+
+        ret.status = "REJECTED"
+        db.commit()
+        db.refresh(ret)
+        return ret
+
+    @staticmethod
     def list_returns(
         db: Session,
         organization_id: str,

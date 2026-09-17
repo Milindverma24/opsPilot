@@ -1,4 +1,4 @@
-.PHONY: help up down restart logs status migrate seed knowledge test test-ai test-security test-e2e test-all demo clean lint run-api run-web run-worker
+.PHONY: help up down restart logs status migrate seed knowledge test test-ai test-security test-e2e test-all demo clean lint run-api run-web run-worker start stop restore
 
 help:
 	@echo "=================================================================="
@@ -6,12 +6,17 @@ help:
 	@echo "Company: UrbanThread (Synthetic Fashion / Clothing E-Commerce)"
 	@echo "=================================================================="
 	@echo ""
+	@echo "One-Command Shell Automation (sh/):"
+	@echo "  make start          Start all services (FastAPI + Next.js web)"
+	@echo "  make stop           Stop all services and free ports"
+	@echo "  make restart        Restart all services gracefully"
+	@echo "  make restore        Backup and restore/re-seed demo database"
+	@echo "  make status         Inspect service health, telemetry, and ports"
+	@echo ""
 	@echo "Local Infrastructure & Lifecycle Commands:"
-	@echo "  make up             Start local stack (Docker Compose or local daemons)"
-	@echo "  make down           Stop local stack"
-	@echo "  make restart        Restart local stack"
+	@echo "  make up             Start Docker Compose stack"
+	@echo "  make down           Stop Docker Compose stack"
 	@echo "  make logs           Follow local container or process logs"
-	@echo "  make status         Check status of local services and health"
 	@echo "  make clean          Clean temporary files, caches, and test artifacts"
 	@echo ""
 	@echo "Database & Knowledge Initialization:"
@@ -31,22 +36,26 @@ help:
 	@echo "  make demo           One-command startup, seeding, and demo scenario run"
 	@echo "=================================================================="
 
+start:
+	./sh/start.sh
+
+stop:
+	./sh/stop.sh
+
+restart:
+	./sh/restart.sh
+
+restore:
+	./sh/restore.sh
+
+status:
+	./sh/status.sh
+
 up:
 	docker compose up -d
 
 down:
 	docker compose down
-
-restart:
-	docker compose restart
-
-logs:
-	docker compose logs -f
-
-status:
-	@curl -s http://localhost:8000/health || echo "FastAPI backend not running"
-	@echo ""
-	docker compose ps
 
 migrate:
 	.venv/bin/python -c "from apps.api.app.core.database_init import init_db; init_db()"

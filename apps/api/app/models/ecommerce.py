@@ -43,6 +43,8 @@ class Product(Base, BaseModelMixin):
     material = Column(String(100), nullable=True)                  # e.g., 100% Organic Cotton, Linen Blend
     color = Column(String(50), nullable=True)
     care_instructions = Column(String(255), nullable=True)
+    image_url = Column(String(512), nullable=True)
+    featured_badge = Column(String(50), nullable=True)             # e.g., Best Seller, Trending, Sustainable, New Arrival
     is_active = Column(Boolean, default=True, nullable=False)
 
     category = relationship("ProductCategory", back_populates="products")

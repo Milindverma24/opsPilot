@@ -66,3 +66,32 @@ def update_shipment_status(
         last_location=payload.last_location
     )
     return {"status": "success", "tracking_number": shipment.tracking_number, "new_status": shipment.status}
+
+
+class CreateShipmentRequest(BaseModel):
+    order_id: str
+    carrier: Optional[str] = "BlueDart Express Courier"
+
+
+@router.post("", status_code=status.HTTP_201_CREATED)
+def create_shipment(
+    payload: CreateShipmentRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    shipment = ShipmentService.create_shipment(
+        db=db,
+        organization_id=current_user.organization_id,
+        order_id=payload.order_id,
+        carrier=payload.carrier or "BlueDart Express Courier"
+    )
+    return {
+        "data": {
+            "id": shipment.id,
+            "tracking_number": shipment.tracking_number,
+            "carrier": shipment.carrier,
+            "status": shipment.status
+        },
+        "meta": {"message": f"Shipment {shipment.tracking_number} created."}
+    }
+

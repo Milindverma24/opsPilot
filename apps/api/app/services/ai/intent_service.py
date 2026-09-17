@@ -34,6 +34,15 @@ _INTENT_RULES: list[tuple[IntentType, list[str]]] = [
         "admin access granted", "unrestricted ai", "without ethical", "safety rules",
         "how to exploit", "run select", "dump json", "rm -rf",
     ]),
+    # Order mutations & Returns (High Precedence)
+    (IntentType.ORDER_CANCELLATION, ["cancel my order", "cancel the order", "want to cancel", "please cancel", "cancel bulk", "cancel order", "to cancel my"]),
+    (IntentType.REFUND_REQUEST, ["issue an immediate refund", "process refund", "demand a refund", "want a refund", "request a refund", "give me a refund", "money back", "reimburse", "refund me", "my refund", "a refund", "refund"]),
+    (IntentType.RETURN_REQUEST, ["want to return", "return my", "send it back", "returning", "initiate a return", "i want to return", "return the", "return window", "doesn't fit", "does not fit", "return"]),
+    (IntentType.EXCHANGE_REQUEST, ["exchange my", "exchange", "swap for", "different size", "replace with"]),
+
+    # Coupons & Promotions
+    (IntentType.COUPON_QUESTION, ["coupons", "coupon", "promo code", "discount code", "discount codes", "voucher", "offer code", "discount"]),
+
     # Grievances & Complaints
     (IntentType.COMPLAINT, [
         "formal complaint", "complaint", "very unhappy", "terrible customer service", "terrible service", "worst experience", "disappointed",
@@ -41,11 +50,7 @@ _INTENT_RULES: list[tuple[IntentType, list[str]]] = [
         "didn't reply", "crushed", "wet upon arrival", "security tag", "broke on", "fake delivery", "scam", "damaged", "poor quality", "worst",
         "shrank", "squeak", "compensation", "nobody resolved", "third time", "not applied",
     ]),
-    # Order mutations & Returns (High Precedence)
-    (IntentType.ORDER_CANCELLATION, ["cancel my order", "cancel the order", "want to cancel", "please cancel", "cancel bulk", "cancel order", "to cancel my"]),
-    (IntentType.REFUND_REQUEST, ["issue an immediate refund", "process refund", "demand a refund", "want a refund", "request a refund", "give me a refund", "money back", "reimburse", "refund me", "my refund", "a refund", "refund"]),
-    (IntentType.RETURN_REQUEST, ["want to return", "return my", "send it back", "returning", "initiate a return", "i want to return", "return the", "return window", "doesn't fit", "does not fit", "return"]),
-    (IntentType.EXCHANGE_REQUEST, ["exchange my", "exchange", "swap for", "different size", "replace with"]),
+
     # Order status inquiries
     (IntentType.ORDER_STATUS, [
         "where is my order", "check the status of order", "status of order", "order status",
@@ -55,6 +60,9 @@ _INTENT_RULES: list[tuple[IntentType, list[str]]] = [
     (IntentType.ORDER_CHANGE, ["change my order", "modify order", "update order", "edit order", "modify my"]),
     (IntentType.VENDOR_REQUEST, ["vendor", "supplier", "purchase order", "po-", "wire transfer", "fabric invoice"]),
     (IntentType.INTERNAL_OPERATION, ["internal task", "operations team", "employee request", "admin task", "employee role"]),
+
+    # Products & Inventory
+    (IntentType.INVENTORY_QUESTION, ["in stock", "stock for", "stock level", "how many left", "quantity available", "inventory", "check stock"]),
 
     # Shipping
     (IntentType.SHIPPING_DELAY, [
@@ -68,8 +76,6 @@ _INTENT_RULES: list[tuple[IntentType, list[str]]] = [
         "free shipping", "help with my delivery", "warehouses located", "tracking", "shipment",
         "delivery", "shipping", "courier", "internationally", "deliver", "cod", "pin code", "warehouse",
     ]),
-    # Products & Inventory
-    (IntentType.INVENTORY_QUESTION, ["in stock", "stock for", "stock level", "how many left", "quantity available", "inventory", "check stock"]),
     (IntentType.PRODUCT_QUESTION, [
         "fabric is used", "materials are used", "material", "washing instructions",
         "do you have", "is it available", "available in", "hoodie", "jeans",
@@ -79,7 +85,6 @@ _INTENT_RULES: list[tuple[IntentType, list[str]]] = [
         "wash care", "fit", "size chart", "bomber", "flannel", "pants", "trouser", "coat", "denim",
         "fabric", "garment", "apparel", "clothing", "sizing",
     ]),
-    (IntentType.COUPON_QUESTION, ["coupons", "coupon", "promo code", "discount code", "discount codes", "voucher", "offer code", "discount"]),
     (IntentType.PAYMENT_ISSUE, ["issue with payment", "payment issue", "payment failed", "charged twice", "double charge", "billing issue", "payment problem", "not charged"]),
 ]
 
@@ -115,7 +120,7 @@ class IntentClassificationService:
         if scan.detected:
             return IntentResult(
                 intent=IntentType.PROMPT_INJECTION,
-                confidence=scan.score,
+                confidence=1.0,
                 reason=f"Security scanner: prompt injection detected ({', '.join(scan.categories)})",
                 is_prompt_injection=True,
                 classification_method="deterministic",
@@ -125,7 +130,14 @@ class IntentClassificationService:
         msg_lower = message.lower()
         for intent_type, keywords in _INTENT_RULES:
             for kw in keywords:
-                if kw in msg_lower:
+                matched = False
+                if len(kw) <= 3:
+                    if re.search(r"\b" + re.escape(kw) + r"\b", msg_lower):
+                        matched = True
+                elif kw in msg_lower:
+                    matched = True
+
+                if matched:
                     if intent_type == IntentType.PROMPT_INJECTION:
                         return IntentResult(
                             intent=IntentType.PROMPT_INJECTION,

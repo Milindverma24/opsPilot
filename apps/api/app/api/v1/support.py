@@ -226,3 +226,22 @@ def takeover_conversation(
 
     return {"data": {"id": msg.id, "content": msg.content, "sender_type": msg.sender_type}}
 
+
+@router.post("/tickets/{id}/resolve")
+def resolve_ticket(
+    id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Resolves a customer support ticket."""
+    ticket = db.query(SupportTicket).filter(
+        SupportTicket.id == id,
+        SupportTicket.organization_id == current_user.organization_id
+    ).first()
+    if not ticket:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found.")
+    ticket.status = "RESOLVED"
+    db.commit()
+    return {"data": {"id": ticket.id, "status": "RESOLVED"}}
+
+

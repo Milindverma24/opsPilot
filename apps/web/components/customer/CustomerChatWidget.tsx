@@ -23,6 +23,7 @@ import {
   ExternalLink,
   Lock,
   UserCheck,
+  BookOpen,
 } from "lucide-react";
 import { api } from "@/lib/api";
 
@@ -67,13 +68,25 @@ export function CustomerChatWidget() {
     }
   }, [messages, isOpen]);
 
+  const [activeOrder, setActiveOrder] = useState<any | null>(null);
+
   const initConversation = async () => {
     try {
       setLoading(true);
+      let orderDetails: any = undefined;
+      try {
+        const stored = localStorage.getItem("urbanthread_active_order");
+        if (stored) {
+          orderDetails = JSON.parse(stored);
+          setActiveOrder(orderDetails);
+        }
+      } catch (e) {}
+
       const res = await api.customer.startConversation({
         channel: "WEBSITE_CHAT",
         customer_id: isGuest ? undefined : simulatedCustomer,
         organization_slug: "urbanthread",
+        order_details: orderDetails,
       });
 
       const conv = res.data;
@@ -142,6 +155,10 @@ export function CustomerChatWidget() {
         });
         activeConvId = convRes.data.conversation_id;
         setConversationId(activeConvId);
+      }
+
+      if (!activeConvId) {
+        throw new Error("Unable to establish conversation session");
       }
 
       const res = await api.customer.sendMessage(activeConvId, text);
@@ -323,6 +340,16 @@ export function CustomerChatWidget() {
                 {isGuest ? "Switch to Auth" : "Switch to Guest"}
               </button>
             </div>
+
+            {/* Active Booked Order Context Banner */}
+            {activeOrder && (
+              <div className="bg-blue-950/80 border-t border-blue-800/50 px-3 py-1.5 flex items-center justify-between text-[10px] text-blue-200">
+                <span className="truncate">
+                  📦 <strong>#{activeOrder.orderNumber}</strong>: {activeOrder.productName} ({activeOrder.size})
+                </span>
+                <span className="text-emerald-300 font-bold shrink-0 ml-2">Booked</span>
+              </div>
+            )}
           </div>
 
           {/* Messages Body */}
@@ -427,6 +454,47 @@ export function CustomerChatWidget() {
                             Cancel
                           </button>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Grounded RAG Citations */}
+                    {msg.metadata?.citations && Array.isArray(msg.metadata.citations) && msg.metadata.citations.length > 0 && (
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-[11px] space-y-1.5 shadow-xs">
+                        <div className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider flex items-center gap-1">
+                          <BookOpen className="w-3 h-3 text-blue-600" />
+                          <span>Grounded Knowledge Sources</span>
+                        </div>
+                        <div className="space-y-1">
+                          {msg.metadata.citations.map((c: any, idx: number) => (
+                            <div key={idx} className="flex items-center justify-between text-[10px] bg-white px-2 py-1 rounded border border-slate-100">
+                              <span className="font-medium text-slate-700 truncate max-w-[200px]" title={c.source}>
+                                {c.source}
+                              </span>
+                              <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 font-semibold shrink-0">
+                                {Math.round((c.confidence || 0.95) * 100)}% Match
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Booking Card CTA */}
+                    {msg.message_type === "BOOKING_CARD" && (
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-3 text-xs space-y-2">
+                        <div className="font-semibold text-blue-950 flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-blue-600" />
+                          <span>UrbanThread Booking Portal</span>
+                        </div>
+                        <p className="text-slate-600 text-[11px]">
+                          Book a try-at-home fitting or schedule a personalized styling session.
+                        </p>
+                        <a
+                          href={msg.metadata?.link || "/store?tab=fitting"}
+                          className="inline-flex items-center justify-center w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-colors"
+                        >
+                          {msg.metadata?.cta || "Open Booking Portal"}
+                        </a>
                       </div>
                     )}
                   </div>

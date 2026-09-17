@@ -125,6 +125,8 @@ class ProductService:
         material: Optional[str] = None,
         color: Optional[str] = None,
         care_instructions: Optional[str] = None,
+        image_url: Optional[str] = None,
+        featured_badge: Optional[str] = None,
         status_val: str = "ACTIVE",
         is_active: bool = True
     ) -> Product:
@@ -163,6 +165,8 @@ class ProductService:
             material=material,
             color=color,
             care_instructions=care_instructions,
+            image_url=image_url,
+            featured_badge=featured_badge,
             is_active=is_active
         )
         db.add(product)

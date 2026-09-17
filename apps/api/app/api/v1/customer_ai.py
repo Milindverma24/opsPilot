@@ -23,6 +23,8 @@ class StartConversationRequest(BaseModel):
     channel: str = Field("WEBSITE_CHAT", example="WEBSITE_CHAT")
     customer_id: Optional[str] = None
     organization_slug: Optional[str] = Field("urbanthread", example="urbanthread")
+    order_id: Optional[str] = None
+    order_details: Optional[Dict[str, Any]] = None
 
 
 class SendMessageRequest(BaseModel):
@@ -44,6 +46,7 @@ def start_conversation(
     """
     Starts a customer chat session.
     Works for both authenticated customers and guest shoppers.
+    Supports personalized greeting when an order is booked from the store.
     """
     # Determine organization
     org = None
@@ -87,23 +90,52 @@ def start_conversation(
                 db.refresh(new_cust)
                 cust_id = new_cust.id
 
-    conv = CustomerConversation(
-        organization_id=org.id,
-        customer_id=cust_id,
-        channel=payload.channel,
-        status="OPEN",
-        context={}
-    )
-    db.add(conv)
-    db.commit()
-    db.refresh(conv)
-
-    # Initial greeting from Aria
+    # Initialize context and personalized greeting
+    initial_context: Dict[str, Any] = {}
     greeting = (
         "Hello! 👋 I'm Aria, your UrbanThread AI Assistant. "
         "I can help you track orders, manage returns or exchanges, check sizing, or answer any policy questions. "
         "How can I assist you today?"
     )
+    suggested_actions = [
+        "Track my order",
+        "Return an item",
+        "Shipping policy",
+        "Find my size"
+    ]
+
+    if payload.order_details:
+        initial_context["order_details"] = payload.order_details
+        p_name = payload.order_details.get("product_name") or payload.order_details.get("productName") or "product"
+        o_num = payload.order_details.get("order_number") or payload.order_details.get("orderNumber") or "recent order"
+        size = payload.order_details.get("size")
+        color = payload.order_details.get("color")
+        cust_name = payload.order_details.get("customer_name") or payload.order_details.get("customerName") or "there"
+        variant_desc = f" ({size}, {color})" if size and color else (f" (Size {size})" if size else "")
+
+        greeting = (
+            f"Hello {cust_name}! 🎉 Congratulations on your order for the **{p_name}{variant_desc}** (Order **#{o_num}**)!\n\n"
+            f"I'm Aria, your personal UrbanThread stylist & operations concierge. I have your order details loaded right here. "
+            f"How can I assist you with your delivery schedule, fabric wash care, sizing, or return policy today?"
+        )
+        suggested_actions = [
+            f"Where is my {p_name} right now?",
+            f"Wash & care guide for {p_name}",
+            f"What is the return window for #{o_num}?",
+            "Book a try-at-home stylist"
+        ]
+
+    conv = CustomerConversation(
+        organization_id=org.id,
+        customer_id=cust_id,
+        channel=payload.channel,
+        status="OPEN",
+        context=initial_context
+    )
+    db.add(conv)
+    db.commit()
+    db.refresh(conv)
+
     initial_msg = ConversationMessage(
         organization_id=org.id,
         conversation_id=conv.id,
@@ -112,14 +144,7 @@ def start_conversation(
         message_type="SUGGESTION",
         content=greeting,
         is_untrusted=False,
-        msg_metadata={
-            "suggested_actions": [
-                "Track my order",
-                "Return an item",
-                "Shipping policy",
-                "Find my size"
-            ]
-        }
+        msg_metadata={"suggested_actions": suggested_actions}
     )
     db.add(initial_msg)
     db.commit()
@@ -131,12 +156,7 @@ def start_conversation(
             "status": conv.status,
             "customer_id": conv.customer_id,
             "greeting": greeting,
-            "suggested_actions": [
-                "Track my order",
-                "Return an item",
-                "Shipping policy",
-                "Find my size"
-            ]
+            "suggested_actions": suggested_actions
         }
     }
 

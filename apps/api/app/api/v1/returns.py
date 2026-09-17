@@ -98,3 +98,19 @@ def approve_return(
         actor_id=current_user.id
     )
     return {"status": "success", "return_number": ret.return_number, "new_status": ret.status}
+
+
+@router.post("/{return_id}/reject")
+def reject_return(
+    return_id: str,
+    current_user: User = Depends(require_permission("returns.approve")),
+    db: Session = Depends(get_db)
+):
+    ret = ReturnService.reject_return(
+        db=db,
+        return_id=return_id,
+        organization_id=current_user.organization_id,
+        actor_id=current_user.id
+    )
+    return {"status": "success", "return_number": ret.return_number, "new_status": ret.status}
+

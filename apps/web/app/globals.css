@@ -27,7 +27,10 @@
     overflow-x: hidden;
   }
 
-  code, kbd, samp, pre {
+  code,
+  kbd,
+  samp,
+  pre {
     font-family: 'JetBrains Mono', monospace;
   }
 }
@@ -99,7 +102,7 @@
 /* Subtle Matrix / Dot Grid */
 .bg-tech-grid {
   background-size: 32px 32px;
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
 }

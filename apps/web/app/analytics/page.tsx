@@ -114,11 +114,10 @@ export default function AnalyticsPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
-                      isActive
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${isActive
                         ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
                         : "bg-slate-950 text-slate-400 hover:text-white border border-slate-800"
-                    }`}
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{tab.label}</span>

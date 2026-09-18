@@ -80,7 +80,7 @@ export function CustomerChatWidget() {
           orderDetails = JSON.parse(stored);
           setActiveOrder(orderDetails);
         }
-      } catch (e) {}
+      } catch (e) { }
 
       const res = await api.customer.startConversation({
         channel: "WEBSITE_CHAT",
@@ -391,11 +391,10 @@ export function CustomerChatWidget() {
 
                   <div className={`max-w-[82%] space-y-2`}>
                     <div
-                      className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
-                        isUser
+                      className={`p-3.5 rounded-2xl text-xs leading-relaxed ${isUser
                           ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-none shadow-md shadow-blue-500/10"
                           : "bg-white text-slate-800 border border-slate-200/80 rounded-tl-none shadow-sm"
-                      }`}
+                        }`}
                     >
                       {msg.content}
                     </div>
@@ -547,11 +546,10 @@ export function CustomerChatWidget() {
                 <button
                   key={star}
                   onClick={() => handleFeedbackSubmit(star)}
-                  className={`p-0.5 transition-transform hover:scale-125 ${
-                    feedbackRating && feedbackRating >= star
+                  className={`p-0.5 transition-transform hover:scale-125 ${feedbackRating && feedbackRating >= star
                       ? "text-amber-400 fill-amber-400"
                       : "text-slate-300 hover:text-amber-400"
-                  }`}
+                    }`}
                 >
                   <Star className="w-3.5 h-3.5 fill-current" />
                 </button>

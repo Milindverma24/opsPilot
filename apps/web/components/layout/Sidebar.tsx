@@ -123,7 +123,7 @@ export function Sidebar() {
       if (stored) {
         setCurrentUser(JSON.parse(stored));
       }
-    } catch {}
+    } catch { }
   }, []);
 
   const handleLogout = () => {
@@ -135,16 +135,16 @@ export function Sidebar() {
   const orgName = currentUser?.email?.includes("urbanthread")
     ? "UrbanThread"
     : currentUser?.email?.includes("globex")
-    ? "Globex Mfg"
-    : "Acme Industries";
+      ? "Globex Mfg"
+      : "Acme Industries";
 
   const userInitials = currentUser?.full_name
     ? currentUser.full_name
-        .split(" ")
-        .map((n: string) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
+      .split(" ")
+      .map((n: string) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase()
     : "OP";
 
   return (
@@ -254,8 +254,8 @@ export function Sidebar() {
                     <span className={cn(
                       "px-1.5 py-0.5 text-[9px] rounded-full font-semibold border",
                       item.badge === "Safety" ? "bg-red-500/20 text-red-300 border-red-500/30" :
-                      item.badge === "Gated" ? "bg-purple-500/20 text-purple-300 border-purple-500/30" :
-                      "bg-blue-500/20 text-blue-300 border-blue-500/30"
+                        item.badge === "Gated" ? "bg-purple-500/20 text-purple-300 border-purple-500/30" :
+                          "bg-blue-500/20 text-blue-300 border-blue-500/30"
                     )}>
                       {item.badge}
                     </span>
